@@ -1,0 +1,25 @@
+nameOverride: postgres
+
+cluster:
+
+  instances: 2
+
+  storage:
+    size: 5Gi
+    storageClass: longhorn
+
+  monitoring:
+    enabled: true
+    podMonitor:
+      enabled: true
+
+  superuserSecret: superuser-secret
+
+  initdb:
+    database: postgres
+    owner: dev
+    secret:
+      name: user-secret
+    postInitSQL:
+      - CREATE SCHEMA IF NOT EXISTS webrtc AUTHORIZATION dev;
+      - CREATE SCHEMA IF NOT EXISTS musichub AUTHORIZATION dev;

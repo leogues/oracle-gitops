@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: portfolio-app
+  namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: portfolio-frontend=leogues/portfolio-frontend
+    argocd-image-updater.argoproj.io/portfolio-frontend.update-strategy: semver
+    argocd-image-updater.argoproj.io/portfolio-frontend.helm.image-name: image.repository
+    argocd-image-updater.argoproj.io/portfolio-frontend.helm.image-tag: image.tag
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/write-back-target: helmvalues:/envs/production/portfolio-app/values.yaml
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+spec:
+  destination:
+    namespace: production
+    server: https://kubernetes.default.svc
+  project: oracle-environments
+  sources:
+    - repoURL: https://github.com/leogues/oracle-gitops.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/leogues/oracle-gitops.git
+      targetRevision: main
+      path: default
+      helm:
+        valueFiles:
+          - $values/envs/production/portfolio-app/values.yaml
+  syncPolicy:
+    automated:
+      allowEmpty: false
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

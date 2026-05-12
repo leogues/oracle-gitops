@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-image-updater
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argocd-image-updater
+      targetRevision: 1.1.5
+      helm:
+        valueFiles:
+          - $values/platform/gitops/argocd-image-updater/values.yaml
+    - repoURL: https://github.com/leogues/oracle-gitops.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/leogues/oracle-gitops.git
+      targetRevision: main
+      path: platform/gitops/argocd-image-updater/extras
+      directory:
+        recurse: false
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

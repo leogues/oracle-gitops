@@ -1,0 +1,82 @@
+global:
+  extraEnvFrom:
+    - secretRef:
+        name: s3-credentials
+  extraArgs:
+    - "-config.expand-env=true"
+
+deploymentMode: SimpleScalable
+
+loki:
+  auth_enabled: false
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  storage_config:
+    use_thanos_objstore: true
+    object_store:
+      s3:
+        bucket_name: "loki"
+        endpoint: "88637849b2895815e424609442014ce3.r2.cloudflarestorage.com"
+        access_key_id: "${R2_ACCESS_KEY_ID}"
+        secret_access_key: "${R2_SECRET_ACCESS_KEY}"
+
+  ingester:
+    chunk_encoding: snappy
+  pattern_ingester:
+    enabled: true
+  limits_config:
+    allow_structured_metadata: true
+    volume_enabled: true
+    retention_period: 24h
+  compactor:
+    retention_enabled: true
+    delete_request_store: s3
+
+  querier:
+    max_concurrent: 4
+
+  storage:
+    bucketNames:
+      chunks: "loki"
+      ruler: "loki"
+      admin: "loki"
+    use_thanos_objstore: true
+    object_store:
+      type: s3
+      s3:
+        bucket_name: "loki"
+        endpoint: "88637849b2895815e424609442014ce3.r2.cloudflarestorage.com"
+        access_key_id: "${R2_ACCESS_KEY_ID}"
+        secret_access_key: "${R2_SECRET_ACCESS_KEY}"
+
+gateway:
+  replicas: 1
+
+resultsCache:
+  allocatedMemory: 1024
+
+chunksCache:
+  allocatedMemory: 2048
+
+backend:
+  replicas: 1
+read:
+  replicas: 1
+write:
+  replicas: 2
+  affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: write
+          topologyKey: kubernetes.io/hostname

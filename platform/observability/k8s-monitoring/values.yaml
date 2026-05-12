@@ -1,0 +1,56 @@
+cluster:
+  name: k8s-monitoring
+
+destinations:
+  mimir:
+    name: mimir
+    type: prometheus
+    url: http://mimir-nginx.monitoring.svc/api/v1/push
+
+  loki:
+    name: loki
+    type: loki
+    url: http://loki-gateway.monitoring.svc/loki/api/v1/push
+
+collectors:
+  alloy-metrics:
+    enabled: true
+    alloy:
+      clustering:
+        enabled: true
+  alloy-singleton:
+    enabled: true
+    alloy:
+      clustering:
+        enabled: true
+  alloy-logs:
+    enabled: true
+    presets: [filesystem-log-reader]
+
+clusterMetrics:
+  enabled: true
+  collector: alloy-metrics
+  destinations:
+    - mimir
+
+prometheusOperatorObjects:
+  enabled: true
+  collector: alloy-singleton
+  destinations:
+    - mimir
+  crds:
+    deploy: true
+
+podLogsViaLoki:
+  enabled: true
+  collector: alloy-logs
+  destinations:
+    - loki
+
+telemetryServices:
+  kube-state-metrics:
+    deploy: true
+
+alloy-operator:
+  waitForAlloyRemoval:
+    enabled: false

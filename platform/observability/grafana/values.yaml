@@ -1,0 +1,52 @@
+admin:
+  existingSecret: grafana-admin
+  userKey: admin-user
+  passwordKey: admin-password
+
+initChownData:
+  enabled: false
+
+resources: {}
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Mimir
+        uid: mimir
+        type: prometheus
+        access: proxy
+        url: http://mimir-nginx.monitoring.svc/prometheus
+        isDefault: true
+        jsonData:
+          tlsSkipVerify: true
+          timeInterval: 30s
+
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        isDefault: false
+        url: http://loki-gateway.monitoring.svc
+
+sidecar:
+  dashboards:
+    enabled: true
+    folderAnnotation: grafana_folder
+    annotations:
+      grafana_folder: "Monitoring"
+    provider:
+      allowUiUpdates: true
+      foldersFromFilesStructure: true
+
+  datasources:
+    enabled: true
+    label: grafana_datasource
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 6Gi
+  finalizers:
+    - kubernetes.io/pvc-protection
