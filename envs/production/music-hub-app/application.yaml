@@ -9,7 +9,7 @@ metadata:
     argocd-image-updater.argoproj.io/music-hub-frontend.helm.image-name: image.repository
     argocd-image-updater.argoproj.io/music-hub-frontend.helm.image-tag: image.tag
     argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/write-back-target: helmvalues:envs/production/music-hub-app/values.yaml
+    argocd-image-updater.argoproj.io/write-back-target: helmvalues:/envs/production/music-hub-app/values.yaml
   finalizers:
     - resources-finalizer.argocd.argoproj.io/background
 spec:
