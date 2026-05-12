@@ -1,0 +1,33 @@
+fullnameOverride: music-hub
+
+image:
+  repository: leogues/music-hub-backend
+  tag: "24"
+
+service:
+  port: 8080
+
+livenessProbe: null
+readinessProbe: null
+
+autoscaling:
+  enabled: true
+  maxReplicas: 2
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: default
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - music.leogues.com.br
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/
+
+env:
+  configMapName: music-hub-config
+  secretName: music-hub-secret
