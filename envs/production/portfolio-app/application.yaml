@@ -3,13 +3,6 @@ kind: Application
 metadata:
   name: portfolio-app
   namespace: argocd
-  annotations:
-    argocd-image-updater.argoproj.io/image-list: portfolio-frontend=leogues/portfolio-frontend
-    argocd-image-updater.argoproj.io/portfolio-frontend.update-strategy: semver
-    argocd-image-updater.argoproj.io/portfolio-frontend.helm.image-name: image.repository
-    argocd-image-updater.argoproj.io/portfolio-frontend.helm.image-tag: image.tag
-    argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/write-back-target: helmvalues:envs/production/portfolio-app/values.yaml
   finalizers:
     - resources-finalizer.argocd.argoproj.io/background
 spec:
