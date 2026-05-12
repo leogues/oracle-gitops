@@ -1,20 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: live-link-prod
+  name: music-hub
   namespace: argocd
   annotations:
-    argocd-image-updater.argoproj.io/image-list: live-link-backend=leogues/video-chat-backend
-    argocd-image-updater.argoproj.io/live-link-backend.update-strategy: semver
-    argocd-image-updater.argoproj.io/live-link-backend.helm.image-name: image.repository
-    argocd-image-updater.argoproj.io/live-link-backend.helm.image-tag: image.tag
+    argocd-image-updater.argoproj.io/image-list: music-hub-backend=leogues/music-hub-backend
+    argocd-image-updater.argoproj.io/music-hub-backend.update-strategy: semver
+    argocd-image-updater.argoproj.io/music-hub-backend.helm.image-name: image.repository
+    argocd-image-updater.argoproj.io/music-hub-backend.helm.image-tag: image.tag
     argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/write-back-target: helmvalues:envs/prod/live-link/values.yaml
+    argocd-image-updater.argoproj.io/write-back-target: helmvalues:envs/production/music-hub/values.yaml
   finalizers:
     - resources-finalizer.argocd.argoproj.io/background
 spec:
   destination:
-    namespace: prod
+    namespace: production
     server: https://kubernetes.default.svc
   project: oracle-environments
   sources:
@@ -26,7 +26,7 @@ spec:
       path: default
       helm:
         valueFiles:
-          - $values/envs/prod/live-link/values.yaml
+          - $values/envs/production/music-hub/values.yaml
   syncPolicy:
     automated:
       allowEmpty: false

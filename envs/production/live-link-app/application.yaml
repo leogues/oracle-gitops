@@ -1,20 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: portfolio-app-prod
+  name: live-link-app
   namespace: argocd
   annotations:
-    argocd-image-updater.argoproj.io/image-list: portfolio-frontend=leogues/portfolio-frontend
-    argocd-image-updater.argoproj.io/portfolio-frontend.update-strategy: semver
-    argocd-image-updater.argoproj.io/portfolio-frontend.helm.image-name: image.repository
-    argocd-image-updater.argoproj.io/portfolio-frontend.helm.image-tag: image.tag
+    argocd-image-updater.argoproj.io/image-list: live-link-frontend=leogues/video-chat-frontend
+    argocd-image-updater.argoproj.io/live-link-frontend.update-strategy: semver
+    argocd-image-updater.argoproj.io/live-link-frontend.helm.image-name: image.repository
+    argocd-image-updater.argoproj.io/live-link-frontend.helm.image-tag: image.tag
     argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/write-back-target: helmvalues:envs/prod/portfolio-app/values.yaml
+    argocd-image-updater.argoproj.io/write-back-target: helmvalues:envs/production/live-link-app/values.yaml
   finalizers:
     - resources-finalizer.argocd.argoproj.io/background
 spec:
   destination:
-    namespace: prod
+    namespace: production
     server: https://kubernetes.default.svc
   project: oracle-environments
   sources:
@@ -26,7 +26,7 @@ spec:
       path: default
       helm:
         valueFiles:
-          - $values/envs/prod/portfolio-app/values.yaml
+          - $values/envs/production/live-link-app/values.yaml
   syncPolicy:
     automated:
       allowEmpty: false
