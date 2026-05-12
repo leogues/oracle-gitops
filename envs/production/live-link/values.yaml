@@ -1,33 +1,27 @@
 fullnameOverride: live-link
-
 image:
   repository: leogues/video-chat-backend
-  tag: "46"
-
+  tag: "53"
 service:
   port: 8080
-
 livenessProbe: null
 readinessProbe: null
-
 autoscaling:
   enabled: true
   maxReplicas: 2
-
 httpRoute:
   enabled: true
   parentRefs:
-    - name: default
-      namespace: gateway-system
-      sectionName: https
+  - name: default
+    namespace: gateway-system
+    sectionName: https
   hostnames:
-    - live.leogues.com.br
+  - live.leogues.com.br
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /api/
-
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api/
 env:
   configMapName: live-link-config
   secretName: live-link-secret
