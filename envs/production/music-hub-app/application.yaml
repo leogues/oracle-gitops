@@ -3,6 +3,13 @@ kind: Application
 metadata:
   name: music-hub-app
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: music-hub-frontend=leogues/music-hub-frontend
+    argocd-image-updater.argoproj.io/music-hub-frontend.update-strategy: semver
+    argocd-image-updater.argoproj.io/music-hub-frontend.helm.image-name: image.repository
+    argocd-image-updater.argoproj.io/music-hub-frontend.helm.image-tag: image.tag
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/write-back-target: helmvalues:envs/production/music-hub-app/values.yaml
   finalizers:
     - resources-finalizer.argocd.argoproj.io/background
 spec:
