@@ -1,34 +1,28 @@
 fullnameOverride: portfolio-app
-
 image:
   repository: leogues/portfolio-frontend
-  tag: "25"
-
+  tag: "27"
 service:
   port: 4200
-
 livenessProbe: null
 readinessProbe: null
-
 autoscaling:
   enabled: true
   maxReplicas: 2
-
 httpRoute:
   enabled: true
   parentRefs:
-    - name: default
-      namespace: gateway-system
-      sectionName: https
-    - name: default
-      namespace: gateway-system
-      sectionName: https-apex
+  - name: default
+    namespace: gateway-system
+    sectionName: https
+  - name: default
+    namespace: gateway-system
+    sectionName: https-apex
   hostnames:
-    - leogues.com.br
-    - www.leogues.com.br
+  - leogues.com.br
+  - www.leogues.com.br
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
