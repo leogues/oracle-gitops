@@ -14,8 +14,6 @@ spec:
     repoURL: https://github.com/kubernetes-sigs/gateway-api
     targetRevision: v1.5.1
     path: config/crd/standard
-    directory:
-      recurse: false
   syncPolicy:
     automated:
       prune: true

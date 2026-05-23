@@ -29,7 +29,8 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - kind: Secret
+          - group: ""
+            kind: Secret
             name: leogues-wildcard-tls
       allowedRoutes:
         namespaces:
@@ -41,7 +42,8 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - kind: Secret
+          - group: ""
+            kind: Secret
             name: leogues-wildcard-tls
       allowedRoutes:
         namespaces:

@@ -23,8 +23,6 @@ spec:
     - repoURL: https://github.com/leogues/oracle-gitops.git
       targetRevision: main
       path: platform/networking/cert-manager/extras
-      directory:
-        recurse: false
   syncPolicy:
     automated:
       prune: true
