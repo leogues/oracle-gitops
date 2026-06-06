@@ -127,3 +127,13 @@ affinity: {}
 env: {}
   # configMapName: my-app-config
   # secretName: my-app-secret
+
+rollout:
+  enabled: false
+  canary:
+    steps:
+      - setWeight: 20
+      - pause: {}
+      - setWeight: 50
+      - pause:
+          duration: 30s
