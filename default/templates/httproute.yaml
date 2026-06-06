@@ -22,10 +22,14 @@ spec:
         {{- toYaml .matches | nindent 8 }}
       backendRefs:
         {{- if and $.Values.rollout.enabled $.Values.rollout.trafficRouting.enabled }}
-        - name: {{ include "app.fullname" $ }}-stable
+        - group: ""
+          kind: Service
+          name: {{ include "app.fullname" $ }}-stable
           port: {{ $.Values.service.port }}
           weight: 100
-        - name: {{ include "app.fullname" $ }}-canary
+        - group: ""
+          kind: Service
+          name: {{ include "app.fullname" $ }}-canary
           port: {{ $.Values.service.port }}
           weight: 0
         {{- else }}
