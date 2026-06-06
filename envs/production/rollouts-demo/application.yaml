@@ -32,6 +32,7 @@ spec:
       kind: HTTPRoute
       jqPathExpressions:
         - .spec.rules[].backendRefs[].weight
+        - .metadata.labels."rollouts.argoproj.io/gatewayapi-canary"
     - group: ""
       kind: Service
       jqPathExpressions:

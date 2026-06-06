@@ -24,7 +24,6 @@ spec:
           argoproj-labs/gatewayAPI:
             httpRoute: {{ include "app.fullname" . }}
             namespace: {{ .Release.Namespace }}
-            disableInProgressLabel: true
       {{- end }}
       steps:
         {{- toYaml .Values.rollout.canary.steps | nindent 8 }}
