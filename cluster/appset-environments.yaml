@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: production-apps
+  name: environments-apps
   namespace: argocd
 spec:
   goTemplate: true
@@ -10,7 +10,7 @@ spec:
         repoURL: https://github.com/leogues/oracle-gitops.git
         revision: HEAD
         files:
-          - path: envs/production/*/values.yaml
+          - path: envs/*/*/values.yaml
   template:
     metadata:
       name: "{{.path.basename}}"
@@ -21,13 +21,13 @@ spec:
         argocd-image-updater.argoproj.io/app.helm.image-name: image.repository
         argocd-image-updater.argoproj.io/app.helm.image-tag: image.tag
         argocd-image-updater.argoproj.io/write-back-method: git
-        argocd-image-updater.argoproj.io/write-back-target: "helmvalues:/envs/production/{{.path.basename}}/values.yaml"
+        argocd-image-updater.argoproj.io/write-back-target: "helmvalues:/{{.path.path}}/values.yaml"
       finalizers:
         - resources-finalizer.argocd.argoproj.io/background
     spec:
       project: oracle-environments
       destination:
-        namespace: production
+        namespace: "{{index .path.segments 1}}"
         server: https://kubernetes.default.svc
       sources:
         - repoURL: https://github.com/leogues/oracle-gitops.git
@@ -38,7 +38,7 @@ spec:
           path: default
           helm:
             valueFiles:
-              - $values/envs/production/{{.path.basename}}/values.yaml
+              - $values/{{.path.path}}/values.yaml
       ignoreDifferences:
         - group: gateway.networking.k8s.io
           kind: HTTPRoute
