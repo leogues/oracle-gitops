@@ -2,7 +2,7 @@ fullnameOverride: rollouts-demo
 replicaCount: 4
 image:
   repository: leogues/video-chat-frontend
-  tag: "53"
+  tag: "52"
 service:
   port: 5173
 livenessProbe: null
