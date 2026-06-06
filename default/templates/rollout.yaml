@@ -16,5 +16,15 @@ spec:
     {{- include "app.podTemplate" . | nindent 4 }}
   strategy:
     canary:
-      {{- toYaml .Values.rollout.canary | nindent 6 }}
+      {{- if .Values.rollout.trafficRouting.enabled }}
+      stableService: {{ include "app.fullname" . }}-stable
+      canaryService: {{ include "app.fullname" . }}-canary
+      trafficRouting:
+        plugins:
+          argoproj-labs/gatewayAPI:
+            httpRoute: {{ include "app.fullname" . }}
+            namespace: {{ .Release.Namespace }}
+      {{- end }}
+      steps:
+        {{- toYaml .Values.rollout.canary.steps | nindent 8 }}
 {{- end }}

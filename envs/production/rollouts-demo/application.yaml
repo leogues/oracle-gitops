@@ -27,6 +27,16 @@ spec:
       helm:
         valueFiles:
           - $values/envs/production/rollouts-demo/values.yaml
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jqPathExpressions:
+        - .spec.rules[].backendRefs[].weight
+        - .metadata.labels."rollouts.argoproj.io/gatewayapi-canary"
+    - group: ""
+      kind: Service
+      jqPathExpressions:
+        - .spec.selector."rollouts-pod-template-hash"
   syncPolicy:
     automated:
       allowEmpty: false
@@ -37,3 +47,4 @@ spec:
       - CreateNamespace=true
       - PrunePropagationPolicy=foreground
       - PruneLast=true
+      - RespectIgnoreDifferences=true

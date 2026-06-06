@@ -1,5 +1,5 @@
 fullnameOverride: rollouts-demo
-replicaCount: 5
+replicaCount: 4
 image:
   repository: leogues/video-chat-frontend
   tag: "53"
@@ -9,10 +9,29 @@ livenessProbe: null
 readinessProbe: null
 rollout:
   enabled: true
+  trafficRouting:
+    enabled: true
   canary:
     steps:
-    - setWeight: 20
-    - pause: {}
-    - setWeight: 60
-    - pause:
-        duration: 30s
+      - setWeight: 10
+      - pause:
+          duration: 30s
+      - setWeight: 40
+      - pause:
+          duration: 30s
+      - setWeight: 70
+      - pause:
+          duration: 30s
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: default
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - rollouts-demo.leogues.com.br
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /

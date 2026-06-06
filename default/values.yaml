@@ -130,6 +130,8 @@ env: {}
 
 rollout:
   enabled: false
+  trafficRouting:
+    enabled: false
   canary:
     steps:
       - setWeight: 20
