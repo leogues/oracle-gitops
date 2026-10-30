@@ -1,7 +1,7 @@
 fullnameOverride: live-link
 image:
   repository: leogues/video-chat-backend
-  tag: "53"
+  tag: "54"
 service:
   port: 8080
 livenessProbe: null
