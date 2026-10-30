@@ -19,8 +19,8 @@ httpRoute:
     namespace: gateway-system
     sectionName: https-apex
   hostnames:
-  - leogues.com.br
-  - www.leogues.com.br
+  - leogues.com
+  - www.leogues.com
   rules:
   - matches:
     - path:

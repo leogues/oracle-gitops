@@ -16,7 +16,7 @@ httpRoute:
     namespace: gateway-system
     sectionName: https
   hostnames:
-  - live.leogues.com.br
+  - live.leogues.com
   rules:
   - matches:
     - path:

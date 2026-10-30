@@ -25,7 +25,7 @@ spec:
     - name: https
       port: 443
       protocol: HTTPS
-      hostname: "*.leogues.com.br"
+      hostname: "*.leogues.com"
       tls:
         mode: Terminate
         certificateRefs:
@@ -38,7 +38,7 @@ spec:
     - name: https-apex
       port: 443
       protocol: HTTPS
-      hostname: "leogues.com.br"
+      hostname: "leogues.com"
       tls:
         mode: Terminate
         certificateRefs:
