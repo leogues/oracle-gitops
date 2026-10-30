@@ -1,7 +1,7 @@
 fullnameOverride: music-hub
 image:
   repository: leogues/music-hub-backend
-  tag: "28"
+  tag: "29"
 service:
   port: 8080
 livenessProbe: null
