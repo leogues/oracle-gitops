@@ -1,5 +1,17 @@
-defaultSetting:
-  defaultReplicaCount: 2
+defaultSettings:
+  defaultReplicaCount: '{"v1":"1","v2":"1"}'
+
+persistence:
+  defaultClassReplicaCount: 1
+
+csi:
+  attacherReplicaCount: 1
+  provisionerReplicaCount: 1
+  resizerReplicaCount: 1
+  snapshotterReplicaCount: 1
+
+longhornUI:
+  replicas: 1
 
 preUpgradeChecker:
   jobEnabled: false

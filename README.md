@@ -10,7 +10,7 @@ infrastructure plus the Argo CD bootstrap; everything else lives here.
 ## Layout
 
 ```
-platform/         # cluster platform stacks (CRDs, storage, networking, data, observability, gitops tooling)
+platform/         # cluster platform stacks (CRDs, storage, networking, data, gitops tooling)
 default/          # generic Helm chart used by every application under envs/
 envs/
   production/     # production applications — picked up by the environments-appset
@@ -20,9 +20,16 @@ envs/
 
 Cluster platform deployments organised as a **2-layer app-of-apps**. The
 root Application — defined in `oracle-infra/infra/envs/prod/k8s/helm/stacks/argocd/resources/platform-root.yaml` — points at `platform/_groups/`,
-which holds six wrapper Applications (`crds`, `foundation`, `networking`,
-`data`, `observability`, `gitops`). Each wrapper recursively syncs its
+which holds five active wrapper Applications (`crds`, `foundation`, `networking`,
+`data`, `gitops`). Each wrapper recursively syncs its
 `platform/<category>/` directory.
+
+The current Always Free deployment uses one A1 server (2 OCPUs / 12 GB).
+PostgreSQL, Longhorn data replicas and the nginx gateway use one replica.
+The observability wrapper and Prometheus CRD Application are commented
+out, and database monitoring is commented out. The observability charts,
+values and routes remain in place for reactivation; restore the CRDs before
+enabling monitoring. This deployment has no node redundancy.
 
 Sync waves on the wrappers control the order in which categories come up.
 Leaf Applications inside each category use sync-wave annotations only for

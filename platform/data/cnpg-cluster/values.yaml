@@ -2,16 +2,17 @@ nameOverride: postgres
 
 cluster:
 
-  instances: 2
+  instances: 1
 
   storage:
     size: 5Gi
     storageClass: longhorn
 
-  monitoring:
-    enabled: true
-    podMonitor:
-      enabled: true
+  # Observability is disabled for the single-node Always Free cluster.
+  # monitoring:
+  #   enabled: true
+  #   podMonitor:
+  #     enabled: true
 
   superuserSecret: superuser-secret
 

@@ -1,5 +1,6 @@
 config:
   clusterWide: true
 
-monitoring:
-  podMonitorEnabled: true
+# Observability is disabled for the single-node Always Free cluster.
+# monitoring:
+#   podMonitorEnabled: true

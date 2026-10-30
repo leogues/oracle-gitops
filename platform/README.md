@@ -4,13 +4,13 @@ Cluster platform stacks reconciled by Argo CD. Pattern: **2-layer app-of-apps**.
 
 ```
 platform/
-├── _groups/        # 6 wrapper Applications (one per category, ordered by sync-wave)
+├── _groups/        # 5 active wrappers; observability wrapper commented out
 └── <category>/<stack>/{application.yaml,values.yaml,extras/}   # leaf apps
 ```
 
 ## Layers
 
-1. **Root** (`oracle-infra/.../argocd/resources/platform-root.yaml`) — points at `platform/_groups/`, creates 6 wrapper Applications.
+1. **Root** (`cluster/root-platform.yaml`) — points at `platform/_groups/`, creates 5 active wrapper Applications.
 2. **Group wrappers** (`platform/_groups/*.yaml`) — each points at its `platform/<category>/` directory. Sync-wave on the wrapper controls category order.
 3. **Leaf apps** (`platform/<category>/<stack>/application.yaml`) — actual chart deployments. Sync-wave optional, only for intra-group ordering (e.g. `cnpg-cluster` after `cnpg-operator`).
 
@@ -22,7 +22,7 @@ platform/
 | 10   | foundation      | Storage (Longhorn) — PVCs everywhere depend on it      |
 | 20   | networking      | Gateways + TLS + DNS — needed by HTTPRoutes downstream |
 | 30   | data            | Operators + their managed clusters                     |
-| 40   | observability   | Metrics/logs collection, depends on storage + network  |
+| 40   | observability (disabled) | Wrapper commented out; configuration preserved |
 | 50   | gitops          | Argo CD tooling (image-updater) — last, depends on rest |
 
 Gaps of 10 leave room for new categories (e.g. `25-security/`) without renumbering.
