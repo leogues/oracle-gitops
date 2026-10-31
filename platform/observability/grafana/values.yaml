@@ -65,12 +65,12 @@ datasources:
           defaultDatabase: otel
           defaultTable: otel_logs
           otelEnabled: true
-          otelVersion: auto
+          otelVersion: latest
         traces:
           defaultDatabase: otel
           defaultTable: otel_traces
           otelEnabled: true
-          otelVersion: auto
+          otelVersion: latest
       secureJsonData:
         password: $CLICKHOUSE_READER_PASSWORD
     - name: ClickHouse Recording Rules
