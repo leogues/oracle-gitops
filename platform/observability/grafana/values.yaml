@@ -1,52 +1,95 @@
+replicas: 1
 admin:
   existingSecret: grafana-admin
   userKey: admin-user
   passwordKey: admin-password
-
 initChownData:
   enabled: false
-
-resources: {}
-
+resources:
+  requests:
+    cpu: 50m
+    memory: 192Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+plugins:
+  - grafana-clickhouse-datasource@4.23.4
+envValueFrom:
+  CLICKHOUSE_READER_PASSWORD:
+    secretKeyRef:
+      name: clickhouse-auth
+      key: reader-password
+grafana.ini:
+  server:
+    domain: grafana.leogues.com
+    root_url: https://grafana.leogues.com
+  users:
+    allow_sign_up: false
+  analytics:
+    reporting_enabled: false
+    check_for_updates: false
 datasources:
   datasources.yaml:
     apiVersion: 1
     datasources:
-      - name: Mimir
-        uid: mimir
+      - name: ClickHouse Metrics
+        uid: clickhouse-prometheus
         type: prometheus
         access: proxy
-        url: http://mimir-nginx.monitoring.svc/prometheus
+        url: http://telemetry-clickhouse-headless.monitoring.svc.cluster.local:8123/prometheus
         isDefault: true
+        basicAuth: true
+        basicAuthUser: grafana
+        secureJsonData:
+          basicAuthPassword: $CLICKHOUSE_READER_PASSWORD
         jsonData:
-          tlsSkipVerify: true
-          timeInterval: 30s
-
-      - name: Loki
-        uid: loki
-        type: loki
+          httpMethod: POST
+          timeInterval: 60s
+          prometheusType: Prometheus
+          prometheusVersion: 3.5.0
+      - name: ClickHouse Logs and Traces
+        uid: clickhouse
+        type: grafana-clickhouse-datasource
         access: proxy
-        isDefault: false
-        url: http://loki-gateway.monitoring.svc
-
+        jsonData:
+          server: telemetry-clickhouse-headless.monitoring.svc.cluster.local
+          port: 9000
+          protocol: native
+          username: grafana
+          defaultDatabase: otel
+          logs:
+            defaultDatabase: otel
+            defaultTable: otel_logs
+            otelEnabled: true
+            otelVersion: auto
+          traces:
+            defaultDatabase: otel
+            defaultTable: otel_traces
+            otelEnabled: true
+            otelVersion: auto
+        secureJsonData:
+          password: $CLICKHOUSE_READER_PASSWORD
 sidecar:
   dashboards:
     enabled: true
-    folderAnnotation: grafana_folder
-    annotations:
-      grafana_folder: "Monitoring"
+    label: grafana_dashboard
+    searchNamespace: monitoring
+    folder: /tmp/dashboards
     provider:
       allowUiUpdates: true
-      foldersFromFilesStructure: true
-
   datasources:
-    enabled: true
-    label: grafana_datasource
-
+    enabled: false
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 persistence:
   enabled: true
-  accessModes:
-    - ReadWriteOnce
-  size: 6Gi
-  finalizers:
-    - kubernetes.io/pvc-protection
+  storageClassName: longhorn
+  accessModes: [ReadWriteOnce]
+  size: 1Gi
+testFramework:
+  enabled: false

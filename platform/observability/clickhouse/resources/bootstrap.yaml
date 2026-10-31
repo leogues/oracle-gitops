@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-bootstrap
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+data:
+  bootstrap.sql: |
+    CREATE DATABASE IF NOT EXISTS otel ENGINE = Atomic;
+    CREATE DATABASE IF NOT EXISTS prometheus ENGINE = Atomic;
+
+    -- ClickHouse 26.10 has scalar timestamp/value columns in its samples target.
+    -- Avoid keeping a second recent-sample copy on this single-node installation.
+    CREATE TABLE IF NOT EXISTS prometheus.metrics
+    ENGINE = TimeSeries
+    SETTINGS recent_samples_ttl_seconds = 0,
+             tags_deduplication_cache_size_bytes = 16777216,
+             metric_families_deduplication_cache_size_bytes = 1048576
+    SAMPLES INNER ENGINE = MergeTree
+      PARTITION BY toDate(timestamp)
+      ORDER BY (id, timestamp)
+      TTL toDateTime(timestamp) + INTERVAL 72 HOUR
+      SETTINGS ttl_only_drop_parts = 1;
+
+    CREATE USER IF NOT EXISTS otel IDENTIFIED WITH sha256_hash BY {writer_hash:String};
+    GRANT CREATE, ALTER, INSERT, SELECT ON otel.* TO otel;
+    GRANT INSERT, SELECT ON prometheus.* TO otel;
+    CREATE USER IF NOT EXISTS grafana IDENTIFIED WITH sha256_hash BY {reader_hash:String};
+    GRANT SELECT ON otel.* TO grafana;
+    GRANT SELECT ON prometheus.* TO grafana;
+    GRANT SELECT ON system.tables TO grafana;
+    GRANT SELECT ON system.columns TO grafana;
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clickhouse-bootstrap-v1
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  backoffLimit: 5
+  activeDeadlineSeconds: 900
+  template:
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      containers:
+        - name: bootstrap
+          image: clickhouse/clickhouse-server:26.10.2.103
+          command: [/bin/bash, -ec]
+          args:
+            - |
+              for attempt in $(seq 1 120); do
+                if clickhouse-client --host telemetry-clickhouse-headless --user default --password "$ADMIN_PASSWORD" --query 'SELECT 1' >/dev/null 2>&1; then
+                  exec clickhouse-client --host telemetry-clickhouse-headless --user default --password "$ADMIN_PASSWORD" \
+                    --param_writer_hash "$WRITER_HASH" --param_reader_hash "$READER_HASH" \
+                    --multiquery --queries-file /bootstrap/bootstrap.sql
+                fi
+                sleep 5
+              done
+              echo 'ClickHouse did not become ready before the bootstrap deadline' >&2
+              exit 1
+          env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-auth
+                  key: admin-password
+            - name: WRITER_HASH
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-auth
+                  key: writer-password-sha256
+            - name: READER_HASH
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-auth
+                  key: reader-password-sha256
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: bootstrap
+              mountPath: /bootstrap
+              readOnly: true
+      volumes:
+        - name: bootstrap
+          configMap:
+            name: clickhouse-bootstrap

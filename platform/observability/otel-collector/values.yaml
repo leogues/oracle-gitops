@@ -1,0 +1,143 @@
+fullnameOverride: otel-collector
+mode: daemonset
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: 0.163.2
+command:
+  name: otelcol-contrib
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+presets:
+  logsCollection:
+    enabled: true
+    includeCollectorLogs: false
+    storeCheckpoints: true
+  kubernetesAttributes:
+    enabled: true
+  hostMetrics:
+    enabled: true
+  kubeletMetrics:
+    enabled: true
+ports:
+  jaeger-compact:
+    enabled: false
+  jaeger-thrift:
+    enabled: false
+  jaeger-grpc:
+    enabled: false
+  zipkin:
+    enabled: false
+service:
+  enabled: true
+  type: ClusterIP
+extraEnvs:
+  - name: CLICKHOUSE_WRITER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: clickhouse-auth
+        key: writer-password
+extraVolumes:
+  - name: export-queue
+    hostPath:
+      path: /var/lib/otelcol-export-queue
+      type: DirectoryOrCreate
+extraVolumeMounts:
+  - name: export-queue
+    mountPath: /var/lib/otelcol-export-queue
+alternateConfig:
+  extensions:
+    health_check:
+      endpoint: ${env:MY_POD_IP}:13133
+    file_storage/queue:
+      directory: /var/lib/otelcol-export-queue
+    basicauth/clickhouse:
+      client_auth:
+        username: otel
+        password: ${env:CLICKHOUSE_WRITER_PASSWORD}
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    file_log:
+      # Passive pod logs; applications will migrate to OTLP separately.
+      include: [/var/log/pods/production_*/*/*.log]
+    hostmetrics:
+      collection_interval: 60s
+    kubeletstats:
+      collection_interval: 60s
+  processors:
+    memory_limiter:
+      check_interval: 5s
+      limit_mib: 400
+      spike_limit_mib: 80
+    resource/cluster:
+      attributes:
+        - key: k8s.cluster.name
+          value: harus
+          action: upsert
+    transform/services:
+      error_mode: ignore
+      log_statements:
+        - context: resource
+          statements:
+            - set(attributes["service.name"], attributes["k8s.deployment.name"]) where attributes["service.name"] == nil and attributes["k8s.deployment.name"] != nil
+            - set(attributes["service.name"], attributes["k8s.container.name"]) where attributes["service.name"] == nil and attributes["k8s.container.name"] != nil
+    deltatocumulative: {}
+    batch/metrics:
+      send_batch_size: 1024
+      timeout: 10s
+  exporters:
+    clickhouse:
+      endpoint: tcp://telemetry-clickhouse-headless.monitoring.svc.cluster.local:9000
+      username: otel
+      password: ${env:CLICKHOUSE_WRITER_PASSWORD}
+      database: otel
+      create_schema: true
+      ttl: 72h
+      sending_queue:
+        num_consumers: 1
+        queue_size: 1000
+        storage: file_storage/queue
+        batch:
+          min_size: 1000
+          flush_timeout: 5s
+      retry_on_failure:
+        enabled: true
+        max_elapsed_time: 0s
+    prometheusremotewrite:
+      endpoint: http://telemetry-clickhouse-headless.monitoring.svc.cluster.local:8123/prometheus/api/v1/write
+      auth:
+        authenticator: basicauth/clickhouse
+      tls:
+        insecure: true
+      resource_to_telemetry_conversion:
+        enabled: true
+      remote_write_queue:
+        num_consumers: 1
+        queue_size: 1000
+      retry_on_failure:
+        enabled: true
+        max_elapsed_time: 0s
+  service:
+    extensions: [health_check, file_storage/queue, basicauth/clickhouse]
+    pipelines:
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, resource/cluster, transform/services]
+        exporters: [clickhouse]
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, resource/cluster]
+        exporters: [clickhouse]
+      metrics:
+        receivers: [otlp]
+        processors: [memory_limiter, resource/cluster, deltatocumulative, batch/metrics]
+        exporters: [prometheusremotewrite]

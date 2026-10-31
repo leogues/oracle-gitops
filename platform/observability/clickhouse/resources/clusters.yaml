@@ -1,0 +1,97 @@
+apiVersion: clickhouse.com/v1alpha1
+kind: KeeperCluster
+metadata:
+  name: telemetry
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+spec:
+  replicas: 1
+  dataVolumeClaimSpec:
+    storageClassName: longhorn
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+  containerTemplate:
+    image:
+      repository: clickhouse/clickhouse-keeper
+      tag: 26.10.2.103
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
+  settings:
+    logger:
+      level: warning
+      logToFile: false
+    extraConfig:
+      keeper_server:
+        coordination_settings:
+          raft_logs_level: warning
+---
+apiVersion: clickhouse.com/v1alpha1
+kind: ClickHouseCluster
+metadata:
+  name: telemetry
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: '1'
+spec:
+  replicas: 1
+  dataVolumeClaimSpec:
+    storageClassName: longhorn
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+  containerTemplate:
+    image:
+      repository: clickhouse/clickhouse-server
+      tag: 26.10.2.103
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: '1.5'
+        memory: 4Gi
+  settings:
+    logger:
+      level: warning
+      logToFile: false
+    defaultUserPassword:
+      secret:
+        name: clickhouse-auth
+        key: admin-password
+    enableDatabaseSync: false
+    systemLogsTTLDays: 3
+    extraConfig:
+      max_server_memory_usage: 3221225472
+      max_connections: 128
+      mark_cache_size: 134217728
+      uncompressed_cache_size: 67108864
+      http_handlers:
+        defaults: {}
+        rule:
+          url_prefix: /prometheus/api/v1
+          handler:
+            type: prometheus_api_v1
+            database: prometheus
+            table: metrics
+    extraUsersConfig:
+      profiles:
+        default:
+          enable_time_series_table: 1
+          default_table_engine: MergeTree
+          max_threads: 2
+          max_memory_usage: 805306368
+          max_execution_time: 60
+  shards: 1
+  keeperClusterRef:
+    name: telemetry

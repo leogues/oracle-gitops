@@ -20,16 +20,19 @@ envs/
 
 Cluster platform deployments organised as a **2-layer app-of-apps**. The
 root Application — defined in `oracle-infra/infra/envs/prod/k8s/helm/stacks/argocd/resources/platform-root.yaml` — points at `platform/_groups/`,
-which holds five active wrapper Applications (`crds`, `foundation`, `networking`,
-`data`, `gitops`). Each wrapper recursively syncs its
+which holds six active wrapper Applications (`crds`, `foundation`, `networking`,
+`data`, `observability`, `gitops`). Each wrapper syncs its
 `platform/<category>/` directory.
 
 The current Always Free deployment uses one A1 server (2 OCPUs / 12 GB).
 PostgreSQL, Longhorn data replicas and the nginx gateway use one replica.
-The observability wrapper and Prometheus CRD Application are commented
-out, and database monitoring is commented out. The observability charts,
-values and routes remain in place for reactivation; restore the CRDs before
-enabling monitoring. This deployment has no node redundancy.
+Observability uses one ClickHouse, one Keeper, an OpenTelemetry Collector
+DaemonSet and Grafana. Metrics use TimeSeries/PromQL; logs and traces use the
+ClickHouse exporter schema. The wrapper explicitly selects these stacks;
+legacy Loki, Mimir and k8s-monitoring stay disabled. Prometheus CRDs and
+database monitoring remain disabled. Application instrumentation is a separate
+change: no application `/metrics` endpoints are scraped. This deployment has
+no node redundancy. See [the observability runbook](platform/observability/README.md).
 
 Sync waves on the wrappers control the order in which categories come up.
 Leaf Applications inside each category use sync-wave annotations only for

@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: otel-collector
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+  sources:
+  - repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+    targetRevision: 0.178.1
+    helm:
+      releaseName: otel-collector
+      valueFiles:
+      - $values/platform/observability/otel-collector/values.yaml
+    chart: opentelemetry-collector
+  - repoURL: https://github.com/leogues/oracle-gitops.git
+    targetRevision: main
+    ref: values

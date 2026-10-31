@@ -1,29 +1,28 @@
-# Disabled for the single-node Always Free cluster. Uncomment to restore.
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: platform-observability
-#   namespace: argocd
-#   annotations:
-#     argocd.argoproj.io/sync-wave: "40"
-#   finalizers:
-#     - resources-finalizer.argocd.argoproj.io/foreground
-# spec:
-#   project: platform
-#   source:
-#     repoURL: https://github.com/leogues/oracle-gitops.git
-#     targetRevision: main
-#     path: platform/observability
-#     directory:
-#       recurse: true
-#       include: '*/application.yaml'
-#   destination:
-#     server: https://kubernetes.default.svc
-#     namespace: argocd
-#   syncPolicy:
-#     automated:
-#       prune: true
-#       selfHeal: true
-#     syncOptions:
-#       - Validate=true
-#       - ServerSideApply=true
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-observability
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '40'
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+  source:
+    repoURL: https://github.com/leogues/oracle-gitops.git
+    targetRevision: main
+    path: platform/observability
+    directory:
+      recurse: true
+      include: '{clickhouse-operator,clickhouse,otel-collector,grafana}/application.yaml'

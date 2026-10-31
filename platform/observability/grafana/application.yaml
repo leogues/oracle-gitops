@@ -4,31 +4,31 @@ metadata:
   name: grafana
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: '3'
   finalizers:
-    - resources-finalizer.argocd.argoproj.io/foreground
+  - resources-finalizer.argocd.argoproj.io/foreground
 spec:
   project: platform
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
   sources:
-    - repoURL: https://grafana.github.io/helm-charts
-      chart: grafana
-      targetRevision: 10.5.15
-      helm:
-        valueFiles:
-          - $values/platform/observability/grafana/values.yaml
-    - repoURL: https://github.com/leogues/oracle-gitops.git
-      targetRevision: main
-      ref: values
-    - repoURL: https://github.com/leogues/oracle-gitops.git
-      targetRevision: main
-      path: platform/observability/grafana/extras
+  - repoURL: https://grafana-community.github.io/helm-charts
+    chart: grafana
+    targetRevision: 14.2.0
+    helm:
+      valueFiles:
+      - $values/platform/observability/grafana/values.yaml
+  - repoURL: https://github.com/leogues/oracle-gitops.git
+    targetRevision: main
+    ref: values
+  - repoURL: https://github.com/leogues/oracle-gitops.git
+    targetRevision: main
+    path: platform/observability/grafana/extras
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
+    - CreateNamespace=true
+    - ServerSideApply=true
