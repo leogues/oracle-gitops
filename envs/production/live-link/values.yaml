@@ -3,7 +3,7 @@ telemetry:
   enabled: true
 image:
   repository: leogues/video-chat-backend
-  tag: "55"
+  tag: "56"
 service:
   port: 8080
 livenessProbe: null
