@@ -6,6 +6,7 @@ metricLabelsAllowlist:
 - nodes=[topology.kubernetes.io/zone]
 metricAllowlist:
 - kube_node_labels
+- kube_node_status_allocatable
 - kube_pod_info
 - kube_pod_container_resource_requests
 - kube_pod_container_status_ready
