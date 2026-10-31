@@ -62,7 +62,7 @@ specific selections, including the deployed Grafana models. Empty mutation,
 replication, dictionary and detached-part panels are expected when those
 resources are absent or idle.
 
-The Overview dashboard (`clickhouse-overview-dashboard.json`) filters Kubernetes
+The ClickHouse Operator Dashboard (`clickhouse-overview-dashboard.json`) filters Kubernetes
 cluster, namespace, pod and PVC dynamically. The PVC list intersects pod volume
 metadata with ClickHouse scrape targets so All cannot include Keeper, Grafana
 or PostgreSQL PVCs. CPU and memory use cAdvisor consumption plus cgroup limits;
