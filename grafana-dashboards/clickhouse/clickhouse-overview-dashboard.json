@@ -361,8 +361,11 @@
             "values": false
           },
           "showPercentChange": false,
-          "textMode": "auto",
-          "wideLayout": true
+          "textMode": "value",
+          "wideLayout": true,
+          "text": {
+            "valueSize": 24
+          }
         },
         "targets": [
           {
@@ -658,8 +661,11 @@
             "values": false
           },
           "showPercentChange": false,
-          "textMode": "auto",
-          "wideLayout": true
+          "textMode": "value",
+          "wideLayout": true,
+          "text": {
+            "valueSize": 24
+          }
         },
         "targets": [
           {
@@ -704,7 +710,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -761,7 +766,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_SelectQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · SELECT",
+            "legendFormat": "SELECT · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           },
@@ -773,7 +778,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_InsertQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · INSERT",
+            "legendFormat": "INSERT · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
@@ -807,7 +812,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -864,7 +868,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_InsertedRows{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · rows/s",
+            "legendFormat": "rows/s · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
@@ -898,7 +902,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -932,7 +935,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · (limit|capacity)$"
+                "options": "^(limit|capacity) · .*"
               },
               "properties": [
                 {
@@ -990,7 +993,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(container_cpu_usage_seconds_total{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · usage",
+            "legendFormat": "usage · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           },
@@ -1002,7 +1005,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_CGroupMaxCPU{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · limit",
+            "legendFormat": "limit · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
@@ -1036,7 +1039,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -1070,7 +1072,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · (limit|capacity)$"
+                "options": "^(limit|capacity) · .*"
               },
               "properties": [
                 {
@@ -1128,7 +1130,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (container_memory_working_set_bytes{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · working set",
+            "legendFormat": "working set · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           },
@@ -1140,7 +1142,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_CGroupMemoryTotal{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · limit",
+            "legendFormat": "limit · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
@@ -1174,7 +1176,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -1208,7 +1209,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · (limit|capacity)$"
+                "options": "^(limit|capacity) · .*"
               },
               "properties": [
                 {
@@ -1266,7 +1267,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_FilesystemMainPathUsedBytes{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · used",
+            "legendFormat": "used · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           },
@@ -1278,7 +1279,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_FilesystemMainPathTotalBytes{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · capacity",
+            "legendFormat": "capacity · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
@@ -1312,7 +1313,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -1369,7 +1369,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_FailedSelectQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · Failed SELECT",
+            "legendFormat": "Failed SELECT · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           },
@@ -1381,7 +1381,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_FailedInsertQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · Failed INSERT",
+            "legendFormat": "Failed INSERT · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
@@ -1415,7 +1415,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -1449,7 +1448,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · shared limit$"
+                "options": "^shared limit · .*"
               },
               "properties": [
                 {
@@ -1482,7 +1481,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · total$"
+                "options": "^total · .*"
               },
               "properties": [
                 {
@@ -1494,7 +1493,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · read$"
+                "options": "^read · .*"
               },
               "properties": [
                 {
@@ -1509,7 +1508,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · write$"
+                "options": "^write · .*"
               },
               "properties": [
                 {
@@ -1524,7 +1523,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · total$"
+                "options": "^total · .*"
               },
               "properties": [
                 {
@@ -1548,10 +1547,13 @@
             "multiLane": false
           },
           "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
+            "calcs": [
+              "lastNotNull"
+            ],
+            "displayMode": "table",
+            "placement": "right",
+            "showLegend": true,
+            "width": 210
           },
           "tooltip": {
             "hideZeros": false,
@@ -1568,7 +1570,7 @@
             },
             "editorMode": "code",
             "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"})",
-            "legendFormat": "{{pvc}} · read",
+            "legendFormat": "read · {{pvc}}",
             "instant": false,
             "range": true
           },
@@ -1580,7 +1582,7 @@
             },
             "editorMode": "code",
             "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"})",
-            "legendFormat": "{{pvc}} · write",
+            "legendFormat": "write · {{pvc}}",
             "instant": false,
             "range": true
           },
@@ -1592,7 +1594,7 @@
             },
             "editorMode": "code",
             "expr": "(max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"})) + (max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}))",
-            "legendFormat": "{{pvc}} · total",
+            "legendFormat": "total · {{pvc}}",
             "instant": false,
             "range": true
           },
@@ -1604,7 +1606,7 @@
             },
             "editorMode": "code",
             "expr": "0 * max by (k8s_cluster_name, node) (longhorn_volume_capacity_bytes{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) + ${disk_iops_limit:raw}",
-            "legendFormat": "{{node}} · shared limit",
+            "legendFormat": "shared limit · {{node}}",
             "instant": false,
             "range": true
           }
@@ -1638,7 +1640,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -1673,7 +1674,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · shared limit$"
+                "options": "^shared limit · .*"
               },
               "properties": [
                 {
@@ -1706,7 +1707,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · total$"
+                "options": "^total · .*"
               },
               "properties": [
                 {
@@ -1718,7 +1719,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · read$"
+                "options": "^read · .*"
               },
               "properties": [
                 {
@@ -1733,7 +1734,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · write$"
+                "options": "^write · .*"
               },
               "properties": [
                 {
@@ -1748,7 +1749,7 @@
             {
               "matcher": {
                 "id": "byRegexp",
-                "options": ".* · total$"
+                "options": "^total · .*"
               },
               "properties": [
                 {
@@ -1772,10 +1773,13 @@
             "multiLane": false
           },
           "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
+            "calcs": [
+              "lastNotNull"
+            ],
+            "displayMode": "table",
+            "placement": "right",
+            "showLegend": true,
+            "width": 210
           },
           "tooltip": {
             "hideZeros": false,
@@ -1792,7 +1796,7 @@
             },
             "editorMode": "code",
             "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000",
-            "legendFormat": "{{pvc}} · read",
+            "legendFormat": "read · {{pvc}}",
             "instant": false,
             "range": true
           },
@@ -1804,7 +1808,7 @@
             },
             "editorMode": "code",
             "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000",
-            "legendFormat": "{{pvc}} · write",
+            "legendFormat": "write · {{pvc}}",
             "instant": false,
             "range": true
           },
@@ -1816,7 +1820,7 @@
             },
             "editorMode": "code",
             "expr": "(max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000) + (max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000)",
-            "legendFormat": "{{pvc}} · total",
+            "legendFormat": "total · {{pvc}}",
             "instant": false,
             "range": true
           },
@@ -1828,7 +1832,7 @@
             },
             "editorMode": "code",
             "expr": "0 * max by (k8s_cluster_name, node) (longhorn_volume_capacity_bytes{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) + ${disk_mbps_limit:raw}",
-            "legendFormat": "{{node}} · shared limit",
+            "legendFormat": "shared limit · {{node}}",
             "instant": false,
             "range": true
           }
@@ -1862,7 +1866,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -1919,7 +1922,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseMetrics_BackgroundMergesAndMutationsPoolTask{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · merges/mutations",
+            "legendFormat": "merges/mutations · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           },
@@ -1931,7 +1934,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseMetrics_BackgroundSchedulePoolTask{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · scheduled",
+            "legendFormat": "scheduled · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           },
@@ -1943,7 +1946,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseMetrics_BackgroundMovePoolTask{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · moves",
+            "legendFormat": "moves · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
@@ -1977,7 +1980,6 @@
               "axisColorMode": "text",
               "axisLabel": "",
               "axisPlacement": "auto",
-              "axisWidth": 55,
               "barAlignment": 0,
               "barWidthFactor": 0.6,
               "drawStyle": "line",
@@ -2034,7 +2036,7 @@
             },
             "editorMode": "code",
             "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_MergedRows{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
-            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · rows/s",
+            "legendFormat": "rows/s · {{k8s_cluster_name}} / {{namespace}} / {{pod}}",
             "instant": false,
             "range": true
           }
