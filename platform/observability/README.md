@@ -37,6 +37,8 @@ The official ClickHouse plugin is pinned to 4.23.4. Three upstream OTel
 dashboards are provisioned from that plugin version: Logs Explorer, Traces
 Explorer and Service Dashboard. Their source is
 https://github.com/grafana/clickhouse-datasource/tree/v4.23.4/src/dashboards.
+The additional `Harus — Infraestrutura` dashboard uses PromQL for node CPU,
+memory, root filesystem, active series, and CPU/memory per pod.
 No traces from applications should be expected until they are instrumented.
 
 ## Storage, bootstrap and upgrades
@@ -58,6 +60,13 @@ without comparing it to 26.10. Schema upgrades require a reviewed migration;
 changing the bootstrap ConfigMap alone does not rerun an already completed Job.
 Bump its Job name when a new migration is necessary. Secret rotation must also
 update existing SQL users, since bootstrap uses `CREATE USER IF NOT EXISTS`.
+
+Deployment validation on 2026-10-31 covered synthetic OTLP metrics, logs and
+traces, their storage in ClickHouse, Grafana datasource health, PromQL panel
+queries and a SQL query through Grafana. Production pod templates, replica
+counts and images were compared before/after and were unchanged. The Collector
+waits for the bootstrap user before starting and contains no Prometheus scrape
+receiver for application endpoints.
 
 References:
 
