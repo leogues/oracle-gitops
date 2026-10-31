@@ -14,7 +14,9 @@ autoscaling:
 httpRoute:
   enabled: true
   parentRefs:
-  - name: default
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: default
     namespace: gateway-system
     sectionName: https
   hostnames:

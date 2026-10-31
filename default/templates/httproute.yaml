@@ -33,7 +33,9 @@ spec:
           port: {{ $.Values.service.port }}
           weight: 0
         {{- else }}
-        - name: {{ include "app.fullname" $ }}
+        - group: ""
+          kind: Service
+          name: {{ include "app.fullname" $ }}
           port: {{ $.Values.service.port }}
         {{- end }}
     {{- end }}
