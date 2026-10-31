@@ -1749,21 +1749,25 @@
         {
           "allowCustomValue": true,
           "current": {
-            "text": "analytics",
-            "value": "analytics"
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
           },
           "datasource": {
             "type": "grafana-clickhouse-datasource",
             "uid": "${datasource}"
           },
-          "definition": "SELECT name FROM system.databases;",
+          "definition": "SELECT name FROM system.databases WHERE lower(name) != 'information_schema' ORDER BY name",
           "hide": 0,
           "includeAll": true,
           "label": "Database",
-          "multi": false,
+          "multi": true,
           "name": "database",
           "options": [],
-          "query": "SELECT name FROM system.databases;",
+          "query": "SELECT name FROM system.databases WHERE lower(name) != 'information_schema' ORDER BY name",
           "refresh": 1,
           "regex": "",
           "regexApplyTo": "value",

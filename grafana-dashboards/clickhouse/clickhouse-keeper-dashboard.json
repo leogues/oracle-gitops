@@ -329,7 +329,7 @@
               "type": "prometheus",
               "uid": "clickhouse-prometheus"
             },
-            "expr": "irate(ClickHouseAsyncMetrics_KeeperPacketsSent{namespace=~\"$namespace\", pod=~\"$pod\", container=\"clickhouse-keeper\"}[1m])",
+            "expr": "irate(ClickHouseAsyncMetrics_KeeperPacketsSent{namespace=~\"$namespace\", pod=~\"$pod\", container=\"clickhouse-keeper\"}[$__rate_interval])",
             "hide": false,
             "interval": "",
             "legendFormat": "OUT {{namespace}}.{{pod}}",
@@ -340,7 +340,7 @@
               "type": "prometheus",
               "uid": "clickhouse-prometheus"
             },
-            "expr": "-irate(ClickHouseAsyncMetrics_KeeperPacketsReceived{namespace=~\"$namespace\", pod=~\"$pod\", container=\"clickhouse-keeper\"}[1m])",
+            "expr": "-irate(ClickHouseAsyncMetrics_KeeperPacketsReceived{namespace=~\"$namespace\", pod=~\"$pod\", container=\"clickhouse-keeper\"}[$__rate_interval])",
             "interval": "",
             "legendFormat": "IN {{namespace}}.{{pod}}",
             "refId": "B"
@@ -834,7 +834,7 @@
               "type": "prometheus",
               "uid": "clickhouse-prometheus"
             },
-            "expr": "irate(ClickHouseMetrics_KeeperOutstandingRequests{namespace=~\"$namespace\", pod=~\"$pod\", container=\"clickhouse-keeper\"}[1m])",
+            "expr": "ClickHouseMetrics_KeeperOutstandingRequests{namespace=~\"$namespace\", pod=~\"$pod\", container=\"clickhouse-keeper\"}",
             "interval": "",
             "legendFormat": "{{namespace}}.{{pod}}",
             "refId": "A"
@@ -943,7 +943,6 @@
     "refresh": "",
     "schemaVersion": 42,
     "tags": [
-      "altinity",
       "clickhouse-keeper",
       "clickhouse",
       "keeper"
@@ -969,7 +968,14 @@
         },
         {
           "allValue": ".+",
-          "current": {},
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
           "datasource": {
             "type": "prometheus",
             "uid": "clickhouse-prometheus"
@@ -990,7 +996,14 @@
         },
         {
           "allValue": ".+",
-          "current": {},
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
           "datasource": {
             "type": "prometheus",
             "uid": "clickhouse-prometheus"

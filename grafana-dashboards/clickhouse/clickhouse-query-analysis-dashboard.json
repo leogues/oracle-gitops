@@ -98,7 +98,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT count() as \"Total queries\" FROM system.query_log WHERE type in ($type) AND initial_user IN ($user) AND query_kind IN ($query_kind) AND $__timeFilter(event_time) ",
+            "rawSql": "SELECT count() as \"Total queries\" FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE type in (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote}) AND $__timeFilter(event_time) ",
             "refId": "A"
           }
         ],
@@ -185,7 +185,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT avg(memory_usage) as \"Avg query memory\", $__timeInterval(query_start_time) as time FROM system.query_log WHERE type in ($type) AND initial_user IN ($user) AND query_kind IN ($query_kind) AND $__timeFilter(event_time) GROUP BY time ORDER BY time",
+            "rawSql": "SELECT avg(memory_usage) as \"Avg query memory\", $__timeInterval(query_start_time) as time FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE type in (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote}) AND $__timeFilter(event_time) GROUP BY time ORDER BY time",
             "refId": "A"
           }
         ],
@@ -283,7 +283,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT query_duration_ms as \"Query time\" FROM system.query_log WHERE type in ($type) AND initial_user IN ($user) AND query_kind IN ($query_kind) AND $__timeFilter(event_time) LIMIT 1000;",
+            "rawSql": "SELECT query_duration_ms as \"Query time\" FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE type in (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote}) AND $__timeFilter(event_time) LIMIT 1000;",
             "refId": "A"
           }
         ],
@@ -359,7 +359,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT initial_user, count() as c FROM system.query_log WHERE type in ($type) AND initial_user IN ($user) AND query_kind IN ($query_kind) GROUP BY initial_user LIMIT 100;\n",
+            "rawSql": "SELECT initial_user, count() as c FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE type in (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote}) AND $__timeFilter(event_time) GROUP BY initial_user LIMIT 100;\n",
             "refId": "A"
           }
         ],
@@ -446,7 +446,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT avg(query_duration_ms) as \"Avg query time\", $__timeInterval(query_start_time) as time FROM system.query_log WHERE type in ($type) AND initial_user IN ($user) AND query_kind IN ($query_kind) AND $__timeFilter(event_time) GROUP BY time ORDER BY time",
+            "rawSql": "SELECT avg(query_duration_ms) as \"Avg query time\", $__timeInterval(query_start_time) as time FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE type in (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote}) AND $__timeFilter(event_time) GROUP BY time ORDER BY time",
             "refId": "A"
           }
         ],
@@ -557,7 +557,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT $__timeInterval(query_start_time) as time,\n       any(normalizeQuery(query)) AS normalized_query,\n       count() as c\nFROM system.query_log\nWHERE type != 'QueryStart'\n  AND $__timeFilter(event_time)\n  AND initial_user IN ($user)\n   AND query_kind IN ($query_kind)\n  AND normalized_query_hash IN (SELECT normalized_query_hash\n                                FROM system.query_log\n                                WHERE type in ($type) AND $__timeFilter(event_time) AND query_kind IN ($query_kind)\n                                GROUP BY normalized_query_hash\n                                ORDER BY count() DESC\n                                LIMIT 5)\nGROUP BY normalized_query_hash, time\nORDER BY time",
+            "rawSql": "SELECT $__timeInterval(query_start_time) as time,\n       any(normalizeQuery(query)) AS normalized_query,\n       count() as c\nFROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\nWHERE type != 'QueryStart'\n  AND $__timeFilter(event_time)\n  AND initial_user IN (${user:singlequote})\n   AND query_kind IN (${query_kind:singlequote})\n  AND normalized_query_hash GLOBAL IN (SELECT normalized_query_hash\n                                FROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\n                                WHERE type in (${type:singlequote}) AND $__timeFilter(event_time) AND query_kind IN (${query_kind:singlequote})\n                                GROUP BY normalized_query_hash\n                                ORDER BY count() DESC\n                                LIMIT 5)\nGROUP BY normalized_query_hash, time\nORDER BY time",
             "refId": "A"
           }
         ],
@@ -676,7 +676,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT $__timeInterval(query_start_time) as time,\n       any(normalizeQuery(query)) AS normalized_query,\n       avg(query_duration_ms) as avg_query_duration\nFROM system.query_log\nWHERE type != 'QueryStart'\n  AND $__timeFilter(event_time)\n  AND type in ($type) AND initial_user IN ($user) AND query_kind IN ($query_kind)\n  AND normalized_query_hash IN (SELECT normalized_query_hash\n                                FROM system.query_log\n                                WHERE type in ($type) AND initial_user IN ($user) AND query_kind IN ($query_kind) AND $__timeFilter(event_time)\n                                GROUP BY normalized_query_hash\n                                ORDER BY avg(query_duration_ms) DESC\n                                LIMIT 10)\nGROUP BY normalized_query_hash, time\nORDER BY time",
+            "rawSql": "SELECT $__timeInterval(query_start_time) as time,\n       any(normalizeQuery(query)) AS normalized_query,\n       avg(query_duration_ms) as avg_query_duration\nFROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\nWHERE type != 'QueryStart'\n  AND $__timeFilter(event_time)\n  AND type in (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote})\n  AND normalized_query_hash GLOBAL IN (SELECT normalized_query_hash\n                                FROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\n                                WHERE type in (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote}) AND $__timeFilter(event_time)\n                                GROUP BY normalized_query_hash\n                                ORDER BY avg(query_duration_ms) DESC\n                                LIMIT 10)\nGROUP BY normalized_query_hash, time\nORDER BY time",
             "refId": "A"
           }
         ],
@@ -791,7 +791,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT $__timeInterval(query_start_time) as time, initial_user as user, count() as \"number of queries by\"\nFROM system.query_log\nWHERE query_kind IN ($query_kind) AND type IN ($type) AND $__timeFilter(event_time) AND initial_user IN (\n  SELECT initial_user\nFROM system.query_log\nWHERE query_kind IN ($query_kind) AND type IN ($type) AND $__timeFilter(event_time)\nGROUP BY initial_user\nORDER BY count() as c DESC\nLIMIT 10\n)\nGROUP BY initial_user, time\nORDER BY time;",
+            "rawSql": "SELECT $__timeInterval(query_start_time) as time, initial_user as user, count() as \"number of queries by\"\nFROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\nWHERE query_kind IN (${query_kind:singlequote}) AND type IN (${type:singlequote}) AND $__timeFilter(event_time) AND initial_user IN (${user:singlequote}) AND initial_user GLOBAL IN (\n  SELECT initial_user\nFROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\nWHERE query_kind IN (${query_kind:singlequote}) AND type IN (${type:singlequote}) AND $__timeFilter(event_time) AND initial_user IN (${user:singlequote})\nGROUP BY initial_user\nORDER BY count() as c DESC\nLIMIT 10\n)\nGROUP BY initial_user, time\nORDER BY time;",
             "refId": "A"
           }
         ],
@@ -920,7 +920,7 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT $__timeInterval(query_start_time) as time, \n      max(memory_usage) as \"Max Memory Usage\"\nFROM system.query_log\nWHERE $__timeFilter(event_time)\nGROUP BY time\nORDER BY time DESC",
+            "rawSql": "SELECT $__timeInterval(query_start_time) as time, \n      max(memory_usage) as \"Max Memory Usage\"\nFROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\nWHERE $__timeFilter(event_time) AND type IN (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote})\nGROUP BY time\nORDER BY time DESC",
             "refId": "A"
           }
         ],
@@ -1063,12 +1063,13 @@
               }
             },
             "queryType": "sql",
-            "rawSql": "SELECT toStartOfInterval(toDateTime(event_time), INTERVAL 60 second),  sum(read_rows) read_rows, sum(written_rows) written_rows FROM system.query_log WHERE $__timeFilter(event_time) GROUP BY event_time ORDER BY event_time ASC",
+            "rawSql": "SELECT $__timeInterval(event_time) AS time, sum(read_rows) AS read_rows, sum(written_rows) AS written_rows FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE $__timeFilter(event_time) AND type IN (${type:singlequote}) AND initial_user IN (${user:singlequote}) AND query_kind IN (${query_kind:singlequote}) GROUP BY time ORDER BY time",
             "refId": "A"
           }
         ],
         "title": "Read vs Write Rows",
-        "type": "timeseries"
+        "type": "timeseries",
+        "description": "Read and written rows grouped into the selected time interval, respecting cluster, query status, user and query-kind filters."
       },
       {
         "datasource": {
@@ -1430,7 +1431,7 @@
             },
             "pluginVersion": "4.20.0",
             "queryType": "table",
-            "rawSql": "SELECT\r\n    hostName() AS replica,\r\n    query_start_time,\r\n    type,\r\n    query_duration_ms,\r\n    initial_user,\r\n    is_initial_query,\r\n    initial_query_id,\r\n    query_id,\r\n    query_kind,\r\n    normalizeQuery(query) AS normalized_query,\r\n    concat(toString(read_rows), ' rows / ',\r\n           formatReadableSize(read_bytes)) AS read,\r\n    concat(toString(written_rows), ' rows / ',\r\n           formatReadableSize(written_bytes)) AS written,\r\n    concat(toString(result_rows), ' rows / ',\r\n           formatReadableSize(result_bytes)) AS result,\r\n    memory_usage,\r\n    ProfileEvents['ParallelReplicasUsedCount'] AS parallel_replicas_used\r\nFROM clusterAllReplicas('nemu', system.query_log)\r\nWHERE type IN ($type)\r\n  AND initial_user IN ($user)\r\n  AND query_kind IN ($query_kind)\r\n  AND $__timeFilter(event_time)\r\nORDER BY query_duration_ms DESC\r\nLIMIT 1000",
+            "rawSql": "SELECT\r\n    hostName() AS replica,\r\n    query_start_time,\r\n    type,\r\n    query_duration_ms,\r\n    initial_user,\r\n    is_initial_query,\r\n    initial_query_id,\r\n    query_id,\r\n    query_kind,\r\n    normalizeQuery(query) AS normalized_query,\r\n    concat(toString(read_rows), ' rows / ',\r\n           formatReadableSize(read_bytes)) AS read,\r\n    concat(toString(written_rows), ' rows / ',\r\n           formatReadableSize(written_bytes)) AS written,\r\n    concat(toString(result_rows), ' rows / ',\r\n           formatReadableSize(result_bytes)) AS result,\r\n    memory_usage,\r\n    ProfileEvents['ParallelReplicasUsedCount'] AS parallel_replicas_used\r\nFROM clusterAllReplicas(${cluster:singlequote}, system.query_log)\r\nWHERE type IN (${type:singlequote})\r\n  AND initial_user IN (${user:singlequote})\r\n  AND query_kind IN (${query_kind:singlequote})\r\n  AND $__timeFilter(event_time)\r\nORDER BY query_duration_ms DESC\r\nLIMIT 1000",
             "refId": "A"
           }
         ],
@@ -1504,23 +1505,43 @@
           "type": "datasource"
         },
         {
+          "name": "cluster",
+          "label": "ClickHouse cluster",
+          "type": "query",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${datasource}"
+          },
+          "query": "SELECT DISTINCT cluster FROM system.clusters ORDER BY cluster",
+          "definition": "SELECT DISTINCT cluster FROM system.clusters ORDER BY cluster",
+          "current": {},
+          "options": [],
+          "refresh": 1,
+          "includeAll": false,
+          "multi": false
+        },
+        {
           "allowCustomValue": true,
           "current": {
-            "text": "",
-            "value": ""
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
           },
           "datasource": {
             "type": "grafana-clickhouse-datasource",
             "uid": "${datasource}"
           },
-          "definition": "SELECT DISTINCT(query_kind) as query_kind FROM system.query_log WHERE query_kind != ''",
+          "definition": "SELECT DISTINCT(query_kind) as query_kind FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE query_kind != ''",
           "hide": 0,
           "includeAll": true,
           "label": "Query kind",
           "multi": true,
           "name": "query_kind",
           "options": [],
-          "query": "SELECT DISTINCT(query_kind) as query_kind FROM system.query_log WHERE query_kind != ''",
+          "query": "SELECT DISTINCT(query_kind) as query_kind FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE query_kind != ''",
           "refresh": 1,
           "regex": "",
           "regexApplyTo": "value",
@@ -1531,21 +1552,25 @@
         {
           "allowCustomValue": true,
           "current": {
-            "text": "",
-            "value": ""
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
           },
           "datasource": {
             "type": "grafana-clickhouse-datasource",
             "uid": "${datasource}"
           },
-          "definition": "SELECT type FROM system.query_log GROUP BY type",
+          "definition": "SELECT type FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) GROUP BY type",
           "hide": 0,
           "includeAll": true,
           "label": "Query status",
           "multi": true,
           "name": "type",
           "options": [],
-          "query": "SELECT type FROM system.query_log GROUP BY type",
+          "query": "SELECT type FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) GROUP BY type",
           "refresh": 1,
           "regex": "",
           "regexApplyTo": "value",
@@ -1556,21 +1581,25 @@
         {
           "allowCustomValue": true,
           "current": {
-            "text": "",
-            "value": ""
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
           },
           "datasource": {
             "type": "grafana-clickhouse-datasource",
             "uid": "${datasource}"
           },
-          "definition": "SELECT DISTINCT(initial_user) FROM system.query_log WHERE initial_user != '' LIMIT 100",
+          "definition": "SELECT DISTINCT(initial_user) FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE initial_user != '' LIMIT 100",
           "hide": 0,
           "includeAll": true,
           "label": "User",
           "multi": true,
           "name": "user",
           "options": [],
-          "query": "SELECT DISTINCT(initial_user) FROM system.query_log WHERE initial_user != '' LIMIT 100",
+          "query": "SELECT DISTINCT(initial_user) FROM clusterAllReplicas(${cluster:singlequote}, system.query_log) WHERE initial_user != '' LIMIT 100",
           "refresh": 1,
           "regex": "",
           "regexApplyTo": "value",

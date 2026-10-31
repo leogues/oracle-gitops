@@ -36,7 +36,7 @@
           "y": 0
         },
         "id": 47,
-        "title": "Overview",
+        "title": "Instance overview",
         "type": "row"
       },
       {
@@ -127,7 +127,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -238,7 +238,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -349,7 +349,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -460,7 +460,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -571,7 +571,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -682,7 +682,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -786,7 +786,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -890,7 +890,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -994,7 +994,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1098,7 +1098,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1202,7 +1202,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1306,7 +1306,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1410,7 +1410,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1514,7 +1514,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1618,7 +1618,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1722,7 +1722,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1826,7 +1826,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1930,7 +1930,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -1962,7 +1962,7 @@
           "y": 73
         },
         "id": 48,
-        "title": "Cloud overview",
+        "title": "Cluster overview",
         "type": "row"
       },
       {
@@ -2046,7 +2046,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2062,7 +2062,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_Query) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_Query) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2150,7 +2150,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2166,7 +2166,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(metric) / 1000000\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSCPUVirtualTimeMicroseconds) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time) GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(metric) / 1000000\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSCPUVirtualTimeMicroseconds) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time) GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2254,7 +2254,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2270,7 +2270,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_Query) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_Query) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2358,7 +2358,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2374,7 +2374,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_Merge) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_Merge) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2462,7 +2462,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2478,7 +2478,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_SelectedBytes) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_SelectedBytes) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2566,7 +2566,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2582,7 +2582,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSIOWaitMicroseconds) / 1000000 AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSIOWaitMicroseconds) / 1000000 AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2670,7 +2670,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2686,7 +2686,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_ReadBufferFromS3Microseconds) / 1000000 AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_ReadBufferFromS3Microseconds) / 1000000 AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2774,7 +2774,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2790,7 +2790,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_ReadBufferFromS3RequestsErrors) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_ReadBufferFromS3RequestsErrors) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2878,7 +2878,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2894,7 +2894,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSCPUWaitMicroseconds) / 1000000 AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSCPUWaitMicroseconds) / 1000000 AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -2982,7 +2982,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -2998,7 +2998,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM clusterAllReplicas(default, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'OSUserTimeNormalized'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'OSUserTimeNormalized'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3086,7 +3086,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3102,7 +3102,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM clusterAllReplicas(default, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'OSSystemTimeNormalized'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'OSSystemTimeNormalized'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3190,7 +3190,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3206,7 +3206,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSReadBytes) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSReadBytes) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3294,7 +3294,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3310,7 +3310,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSReadChars) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_OSReadChars) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3398,7 +3398,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3414,7 +3414,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_MemoryTracking) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_MemoryTracking) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3502,7 +3502,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3518,7 +3518,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM (\n  SELECT event_time, sum(value) AS value\n  FROM clusterAllReplicas(default, merge('system', '^asynchronous_metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n    AND metric = 'LoadAverage15'\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM (\n  SELECT event_time, sum(value) AS value\n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^asynchronous_metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n    AND metric = 'LoadAverage15'\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3606,7 +3606,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3622,7 +3622,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_SelectedRows) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_SelectedRows) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3710,7 +3710,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3726,7 +3726,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_InsertedRows) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_InsertedRows) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3814,7 +3814,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3830,7 +3830,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, max(value)\nFROM clusterAllReplicas(default, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'TotalPartsOfMergeTreeTables'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, max(value)\nFROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'TotalPartsOfMergeTreeTables'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -3918,7 +3918,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -3934,7 +3934,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, max(value)\nFROM clusterAllReplicas(default, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'MaxPartCountForPartition'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, max(value)\nFROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^asynchronous_metric_log'))\nWHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\nAND metric = 'MaxPartCountForPartition'\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4022,7 +4022,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4038,7 +4038,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_ReadBufferFromS3Bytes) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_ReadBufferFromS3Bytes) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4126,7 +4126,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4142,7 +4142,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_FilesystemCacheSize) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(CurrentMetric_FilesystemCacheSize) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4230,7 +4230,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4246,7 +4246,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_DiskS3PutObject + ProfileEvent_DiskS3UploadPart + ProfileEvent_DiskS3CreateMultipartUpload + ProfileEvent_DiskS3CompleteMultipartUpload) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_DiskS3PutObject + ProfileEvent_DiskS3UploadPart + ProfileEvent_DiskS3CreateMultipartUpload + ProfileEvent_DiskS3CompleteMultipartUpload) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4334,7 +4334,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4350,7 +4350,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_DiskS3GetObject + ProfileEvent_DiskS3HeadObject + ProfileEvent_DiskS3ListObjects) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_DiskS3GetObject + ProfileEvent_DiskS3HeadObject + ProfileEvent_DiskS3ListObjects) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4438,7 +4438,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4454,7 +4454,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_CachedReadBufferReadFromCacheBytes) / (sum(ProfileEvent_CachedReadBufferReadFromCacheBytes) + sum(ProfileEvent_CachedReadBufferReadFromSourceBytes)) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, sum(ProfileEvent_CachedReadBufferReadFromCacheBytes) / (sum(ProfileEvent_CachedReadBufferReadFromCacheBytes) + sum(ProfileEvent_CachedReadBufferReadFromSourceBytes)) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4542,7 +4542,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4558,7 +4558,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, greatest(0, (sum(ProfileEvent_OSReadChars) - sum(ProfileEvent_OSReadBytes)) / (sum(ProfileEvent_OSReadChars) + sum(ProfileEvent_ReadBufferFromS3Bytes))) AS metric \n  FROM clusterAllReplicas(default, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT \n  toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t,\n  avg(metric)\nFROM (\n  SELECT event_time, greatest(0, (sum(ProfileEvent_OSReadChars) - sum(ProfileEvent_OSReadBytes)) / (sum(ProfileEvent_OSReadChars) + sum(ProfileEvent_ReadBufferFromS3Bytes))) AS metric \n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4646,7 +4646,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4662,7 +4662,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM (\n  SELECT event_time, sum(value) AS value\n  FROM clusterAllReplicas(default, merge('system', '^asynchronous_metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n    AND metric LIKE 'NetworkReceiveBytes%'\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM (\n  SELECT event_time, sum(value) AS value\n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^asynchronous_metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n    AND metric LIKE 'NetworkReceiveBytes%'\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4750,7 +4750,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4766,7 +4766,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM (\n  SELECT event_time, sum(value) AS value\n  FROM clusterAllReplicas(default, merge('system', '^asynchronous_metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n    AND metric LIKE 'NetworkSendBytes%'\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, avg(value)\nFROM (\n  SELECT event_time, sum(value) AS value\n  FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^asynchronous_metric_log'))\n  WHERE $__dateFilter(event_date) AND $__timeFilter(event_time)\n    AND metric LIKE 'NetworkSendBytes%'\n  GROUP BY event_time)\nGROUP BY t\nORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4854,7 +4854,7 @@
           {
             "datasource": {
               "type": "grafana-clickhouse-datasource",
-              "uid": "clickhouse"
+              "uid": "${datasource}"
             },
             "editorType": "sql",
             "format": 0,
@@ -4870,7 +4870,7 @@
             },
             "pluginVersion": "4.3.2",
             "queryType": "timeseries",
-            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, max(TCP_Connections), max(MySQL_Connections), max(HTTP_Connections) FROM (SELECT event_time, sum(CurrentMetric_TCPConnection) AS TCP_Connections, sum(CurrentMetric_MySQLConnection) AS MySQL_Connections, sum(CurrentMetric_HTTPConnection) AS HTTP_Connections FROM clusterAllReplicas(default, merge('system', '^metric_log')) WHERE $__dateFilter(event_date) AND $__timeFilter(event_time) GROUP BY event_time) GROUP BY t ORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
+            "rawSql": "SELECT toStartOfInterval(event_time, INTERVAL $__interval_s SECOND) AS t, max(TCP_Connections), max(MySQL_Connections), max(HTTP_Connections) FROM (SELECT event_time, sum(CurrentMetric_TCPConnection) AS TCP_Connections, sum(CurrentMetric_MySQLConnection) AS MySQL_Connections, sum(CurrentMetric_HTTPConnection) AS HTTP_Connections FROM clusterAllReplicas(${cluster:singlequote}, merge('system', '^metric_log')) WHERE $__dateFilter(event_date) AND $__timeFilter(event_time) GROUP BY event_time) GROUP BY t ORDER BY t WITH FILL STEP $__interval_s SETTINGS skip_unavailable_shards = 1",
             "refId": "A"
           }
         ],
@@ -4904,6 +4904,38 @@
     "tags": [
       "clickhouse",
       "monitoring"
-    ]
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "datasource",
+          "label": "ClickHouse instance",
+          "type": "datasource",
+          "query": "grafana-clickhouse-datasource",
+          "current": {
+            "text": "ClickHouse Logs and Traces",
+            "value": "clickhouse"
+          },
+          "options": [],
+          "refresh": 1
+        },
+        {
+          "name": "cluster",
+          "label": "ClickHouse cluster",
+          "type": "query",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${datasource}"
+          },
+          "query": "SELECT DISTINCT cluster FROM system.clusters ORDER BY cluster",
+          "definition": "SELECT DISTINCT cluster FROM system.clusters ORDER BY cluster",
+          "current": {},
+          "options": [],
+          "refresh": 1,
+          "includeAll": false,
+          "multi": false
+        }
+      ]
+    }
   }
 }
