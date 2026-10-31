@@ -50,8 +50,8 @@ memory, root filesystem, active series, and CPU/memory per pod.
 No traces from applications should be expected until they are instrumented.
 
 The official **CloudNativePG** dashboard comes from the `cluster` chart 0.0.5
-in https://github.com/cloudnative-pg/grafana-dashboards. Only datasource and
-initial variable selections are configured locally; its queries stay upstream.
+in https://github.com/cloudnative-pg/grafana-dashboards. Datasource and initial variable selections are configured locally; the alert
+list panel is removed. Its queries stay upstream.
 `kube-state-metrics` chart 8.8.0 supplies a small allowlist of pod/node metadata.
 Grafana provisions the required CPU recording rule and writes its output to
 ClickHouse using the existing writer credential through a dedicated target
