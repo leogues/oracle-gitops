@@ -56,7 +56,7 @@ datasources:
       type: grafana-clickhouse-datasource
       access: proxy
       jsonData:
-        server: telemetry-clickhouse-headless.monitoring.svc.cluster.local
+        host: telemetry-clickhouse-headless.monitoring.svc.cluster.local
         port: 9000
         protocol: native
         username: grafana

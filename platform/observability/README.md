@@ -40,7 +40,8 @@ create temporary tables required by PromQL evaluation. It cannot change
 persistent telemetry tables. The Collector has write/schema permissions only
 for telemetry.
 
-The official ClickHouse plugin is pinned to 4.23.4. Three upstream OTel
+The official ClickHouse plugin is pinned to 4.23.4. Logs/traces use its
+`latest` OTel schema selector (the UI label is “auto (latest)”). Three upstream OTel
 dashboards are provisioned from that plugin version: Logs Explorer, Traces
 Explorer and Service Dashboard. Their source is
 https://github.com/grafana/clickhouse-datasource/tree/v4.23.4/src/dashboards.
@@ -64,7 +65,7 @@ those features or requests are not configured on the single-instance database.
 
 Longhorn PVC requests: ClickHouse 20 GiB, Keeper 1 GiB, Grafana 1 GiB,
 with one Longhorn replica. This is a single-node deployment with no failover.
-ClickHouse has a 4 GiB container memory limit and 3 GiB server memory budget.
+ClickHouse has a 2.5 GiB container memory limit and 2 GiB server memory budget.
 Collector file checkpoints and export queue use persistent node directories.
 
 `clickhouse-bootstrap-v2` is an idempotent GitOps Job. It creates databases,

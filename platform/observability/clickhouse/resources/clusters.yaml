@@ -60,7 +60,7 @@ spec:
         memory: 2Gi
       limits:
         cpu: '1.5'
-        memory: 4Gi
+        memory: 2560Mi
   settings:
     logger:
       level: warning
@@ -72,7 +72,7 @@ spec:
     enableDatabaseSync: false
     systemLogsTTLDays: 3
     extraConfig:
-      max_server_memory_usage: 3221225472
+      max_server_memory_usage: 2147483648
       max_connections: 128
       mark_cache_size: 134217728
       uncompressed_cache_size: 67108864
