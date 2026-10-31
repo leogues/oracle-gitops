@@ -42,13 +42,28 @@ also create temporary tables required by PromQL evaluation; persistent writes
 are not granted. The Collector has write/schema permissions only for telemetry.
 
 The official ClickHouse plugin is pinned to 4.23.4. Logs/traces use its
-`latest` OTel schema selector (the UI label is “auto (latest)”). Three upstream OTel
-dashboards are provisioned from that plugin version: Logs Explorer, Traces
-Explorer and Service Dashboard. Their source is
-https://github.com/grafana/clickhouse-datasource/tree/v4.23.4/src/dashboards.
-The additional `Harus — Infraestrutura` dashboard uses PromQL for node CPU,
-memory, root filesystem, active series, and CPU/memory per pod.
-No traces from applications should be expected until they are instrumented.
+`latest` OTel schema selector (the UI label is “auto (latest)”).
+
+Dashboards and folders are managed by Grafana Git Sync from the `main` branch
+of `leogues/oracle-gitops`, path `grafana-dashboards/`. The PostgreSQL dashboard
+is `cloudnativepg.json` (UID `ddg2w79lsgd98gb`). The `clickhouse/` directory has
+stable folder metadata and five dashboards: Advanced Monitoring, Cluster
+Analysis, Data Analysis, Query Analysis and Keeper. The Altinity operator
+dashboard is removed because this cluster uses the official ClickHouse operator.
+
+ClickHouse dashboards discover cluster names from `system.clusters` and offer
+instance, database, table, user, status and query-kind filters where relevant.
+No Nemu cluster or database name is selected by default. Keeper namespace/pod
+filters discover the available metrics; rate windows use `$__rate_interval`
+for the 60-second scrape interval, and outstanding requests is a gauge.
+Validation covered all 97 panel queries and 10 query variables with All and
+specific selections, including the deployed Grafana models. Empty mutation,
+replication, dictionary and detached-part panels are expected when those
+resources are absent or idle.
+
+The five legacy ConfigMap dashboards and their sidecar/provider are removed.
+Datasources and the CPU recording rule remain provisioned by Helm. The Git Sync
+connection and token configured in Grafana persist on its existing data PVC.
 
 The official **CloudNativePG** dashboard comes from the `cluster` chart 0.0.5
 in https://github.com/cloudnative-pg/grafana-dashboards. The upstream alert list
@@ -66,7 +81,7 @@ Grafana provisions the required CPU recording rule and writes its output to
 ClickHouse using the existing writer credential through a dedicated target
 datasource. There are no alert rules or notifications.
 
-Dashboard manifests include `dashboard` in their filenames. PostgreSQL panels
+ClickHouse dashboard JSON filenames include `dashboard`. PostgreSQL panels
 for standby-only lag, backups, separate WAL PVCs and tablespaces can be empty
 when those features are not configured on the single-instance database.
 The CNPG operator chart is pinned to 0.28.3 (operator 1.29.1): 0.28.1 contained
