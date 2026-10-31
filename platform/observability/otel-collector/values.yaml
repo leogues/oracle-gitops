@@ -2,36 +2,31 @@ fullnameOverride: otel-collector
 mode: daemonset
 image:
   repository: otel/opentelemetry-collector-contrib
-  tag: 0.163.2
 command:
   name: otelcol-contrib
 initContainers:
-  - name: wait-clickhouse
-    image: clickhouse/clickhouse-server:26.10.2.103
-    command: [/bin/bash, -ec]
-    args:
-      - |
-        for attempt in $(seq 1 120); do
-          if clickhouse-client --host telemetry-clickhouse-headless --port 9000 --user otel --password "$WRITER_PASSWORD" --query 'SELECT 1' >/dev/null 2>&1; then
-            exit 0
-          fi
-          sleep 5
-        done
-        echo 'ClickHouse bootstrap did not become ready' >&2
-        exit 1
-    env:
-      - name: WRITER_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: clickhouse-auth
-            key: writer-password
-    resources:
-      requests:
-        cpu: 25m
-        memory: 64Mi
-      limits:
-        cpu: 250m
-        memory: 256Mi
+- name: wait-clickhouse
+  image: clickhouse/clickhouse-server:26.10.2.103
+  command:
+  - /bin/bash
+  - -ec
+  args:
+  - "for attempt in $(seq 1 120); do\n  if clickhouse-client --host telemetry-clickhouse-headless --port 9000 --user\
+    \ otel --password \"$WRITER_PASSWORD\" --query 'SELECT 1' >/dev/null 2>&1; then\n    exit 0\n  fi\n  sleep 5\n\
+    done\necho 'ClickHouse bootstrap did not become ready' >&2\nexit 1\n"
+  env:
+  - name: WRITER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: clickhouse-auth
+        key: writer-password
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
 resources:
   requests:
     cpu: 100m
@@ -42,7 +37,6 @@ resources:
 presets:
   logsCollection:
     enabled: true
-    includeCollectorLogs: false
     storeCheckpoints: true
   kubernetesAttributes:
     enabled: true
@@ -61,21 +55,20 @@ ports:
     enabled: false
 service:
   enabled: true
-  type: ClusterIP
 extraEnvs:
-  - name: CLICKHOUSE_WRITER_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: clickhouse-auth
-        key: writer-password
+- name: CLICKHOUSE_WRITER_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: clickhouse-auth
+      key: writer-password
 extraVolumes:
-  - name: export-queue
-    hostPath:
-      path: /var/lib/otelcol-export-queue
-      type: DirectoryOrCreate
+- name: export-queue
+  hostPath:
+    path: /var/lib/otelcol-export-queue
+    type: DirectoryOrCreate
 extraVolumeMounts:
-  - name: export-queue
-    mountPath: /var/lib/otelcol-export-queue
+- name: export-queue
+  mountPath: /var/lib/otelcol-export-queue
 alternateConfig:
   extensions:
     health_check:
@@ -94,12 +87,257 @@ alternateConfig:
         http:
           endpoint: 0.0.0.0:4318
     file_log:
-      # Passive pod logs; applications will migrate to OTLP separately.
-      include: [/var/log/pods/production_*/*/*.log]
+      include:
+      - /var/log/pods/*/*/*.log
+      exclude:
+      - /var/log/pods/production_*/*/*.log
+      - /var/log/pods/monitoring_otel-collector*_*/opentelemetry-collector/*.log
     hostmetrics:
       collection_interval: 60s
     kubeletstats:
       collection_interval: 60s
+    prometheus:
+      config:
+        scrape_configs:
+        - honor_labels: true
+          sample_limit: 20000
+          kubernetes_sd_configs:
+          - role: pod
+            selectors:
+            - role: pod
+              field: spec.nodeName=${env:K8S_NODE_NAME}
+          metric_relabel_configs:
+          - source_labels:
+            - namespace
+            regex: production
+            action: drop
+          job_name: kubernetes-pods
+          relabel_configs:
+          - source_labels:
+            - __meta_kubernetes_namespace
+            regex: production
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_pod_phase
+            regex: Running
+            action: keep
+          - source_labels:
+            - __meta_kubernetes_pod_container_init
+            regex: 'true'
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_pod_container_port_name
+            regex: (.*[-_])?metrics|prometheus
+            action: keep
+          - source_labels:
+            - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+            regex: 'false'
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_namespace
+            - __meta_kubernetes_pod_name
+            regex: argocd;argocd-dex-server-.*
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_pod_container_port_number
+            regex: '8443'
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_namespace
+            target_label: namespace
+          - source_labels:
+            - __meta_kubernetes_pod_name
+            target_label: pod
+          - source_labels:
+            - __meta_kubernetes_pod_container_name
+            target_label: container
+          - source_labels:
+            - __meta_kubernetes_pod_node_name
+            target_label: node
+          - source_labels:
+            - __meta_kubernetes_pod_label_cnpg_io_cluster
+            target_label: cluster
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: (.+)
+            target_label: job
+            replacement: $$1
+        - honor_labels: true
+          sample_limit: 20000
+          kubernetes_sd_configs:
+          - role: pod
+            selectors:
+            - role: pod
+              field: spec.nodeName=${env:K8S_NODE_NAME}
+          metric_relabel_configs:
+          - source_labels:
+            - namespace
+            regex: production
+            action: drop
+          job_name: infrastructure
+          relabel_configs:
+          - source_labels:
+            - __meta_kubernetes_namespace
+            regex: production
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_pod_phase
+            regex: Running
+            action: keep
+          - source_labels:
+            - __meta_kubernetes_pod_container_init
+            regex: 'true'
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_namespace
+            - __meta_kubernetes_pod_name
+            - __meta_kubernetes_pod_container_port_number
+            regex: cloudflared;cloudflared-.*;|dns;external-dns-.*;7979|longhorn-system;(csi-attacher|csi-provisioner|csi-resizer|csi-snapshotter)-.*;8000|longhorn-system;longhorn-manager-.*;9500|monitoring;grafana-.*;3000|monitoring;.*kube-state-metrics-.*;8080
+            action: keep
+          - source_labels:
+            - __meta_kubernetes_namespace
+            - __meta_kubernetes_pod_name
+            - __address__
+            regex: cloudflared;cloudflared-.*;(.+)
+            target_label: __address__
+            replacement: $$1:2000
+          - source_labels:
+            - __meta_kubernetes_namespace
+            target_label: namespace
+          - source_labels:
+            - __meta_kubernetes_pod_name
+            target_label: pod
+          - source_labels:
+            - __meta_kubernetes_pod_container_name
+            target_label: container
+          - source_labels:
+            - __meta_kubernetes_pod_node_name
+            target_label: node
+          - source_labels:
+            - __meta_kubernetes_pod_label_cnpg_io_cluster
+            target_label: cluster
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: (.+)
+            target_label: job
+            replacement: $$1
+        - honor_labels: true
+          sample_limit: 20000
+          kubernetes_sd_configs:
+          - role: pod
+            selectors:
+            - role: pod
+              field: spec.nodeName=${env:K8S_NODE_NAME}
+          metric_relabel_configs:
+          - source_labels:
+            - namespace
+            regex: production
+            action: drop
+          job_name: secure-controllers
+          relabel_configs:
+          - source_labels:
+            - __meta_kubernetes_namespace
+            regex: production
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_pod_phase
+            regex: Running
+            action: keep
+          - source_labels:
+            - __meta_kubernetes_pod_container_init
+            regex: 'true'
+            action: drop
+          - source_labels:
+            - __meta_kubernetes_namespace
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            - __meta_kubernetes_pod_container_port_number
+            regex: argocd;argocd-image-updater;8443
+            action: keep
+          - source_labels:
+            - __meta_kubernetes_namespace
+            target_label: namespace
+          - source_labels:
+            - __meta_kubernetes_pod_name
+            target_label: pod
+          - source_labels:
+            - __meta_kubernetes_pod_container_name
+            target_label: container
+          - source_labels:
+            - __meta_kubernetes_pod_node_name
+            target_label: node
+          - source_labels:
+            - __meta_kubernetes_pod_label_cnpg_io_cluster
+            target_label: cluster
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: (.+)
+            target_label: job
+            replacement: $$1
+          scheme: https
+          authorization:
+            credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          tls_config:
+            insecure_skip_verify: true
+        - job_name: kubelet-volumes
+          scheme: https
+          authorization:
+            credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          kubernetes_sd_configs:
+          - role: node
+            selectors:
+            - role: node
+              field: metadata.name=${env:K8S_NODE_NAME}
+          relabel_configs:
+          - source_labels:
+            - __meta_kubernetes_node_name
+            target_label: node
+          - target_label: metrics_path
+            replacement: /metrics
+          metric_relabel_configs:
+          - source_labels:
+            - namespace
+            regex: production
+            action: drop
+          - source_labels:
+            - __name__
+            regex: kubelet_volume_stats_.*
+            action: keep
+        - job_name: kubelet
+          scheme: https
+          authorization:
+            credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          metrics_path: /metrics/cadvisor
+          kubernetes_sd_configs:
+          - role: node
+            selectors:
+            - role: node
+              field: metadata.name=${env:K8S_NODE_NAME}
+          relabel_configs:
+          - source_labels:
+            - __meta_kubernetes_node_name
+            target_label: node
+          - target_label: metrics_path
+            replacement: /metrics/cadvisor
+          metric_relabel_configs:
+          - source_labels:
+            - namespace
+            regex: production
+            action: drop
+          - source_labels:
+            - __name__
+            regex: container_cpu_usage_seconds_total|container_memory_working_set_bytes
+            action: keep
+        - job_name: otel-collector
+          static_configs:
+          - targets:
+            - ${env:MY_POD_IP}:8888
+            labels:
+              namespace: monitoring
+              pod: ${env:MY_POD_NAME}
   processors:
     memory_limiter:
       check_interval: 5s
@@ -107,16 +345,18 @@ alternateConfig:
       spike_limit_mib: 80
     resource/cluster:
       attributes:
-        - key: k8s.cluster.name
-          value: harus
-          action: upsert
+      - key: k8s.cluster.name
+        value: harus
+        action: upsert
     transform/services:
       error_mode: ignore
       log_statements:
-        - context: resource
-          statements:
-            - set(attributes["service.name"], attributes["k8s.deployment.name"]) where attributes["service.name"] == nil and attributes["k8s.deployment.name"] != nil
-            - set(attributes["service.name"], attributes["k8s.container.name"]) where attributes["service.name"] == nil and attributes["k8s.container.name"] != nil
+      - context: resource
+        statements:
+        - set(attributes["service.name"], attributes["k8s.deployment.name"]) where attributes["service.name"] ==
+          nil and attributes["k8s.deployment.name"] != nil
+        - set(attributes["service.name"], attributes["k8s.container.name"]) where attributes["service.name"] ==
+          nil and attributes["k8s.container.name"] != nil
     deltatocumulative: {}
     batch/metrics:
       send_batch_size: 1024
@@ -139,32 +379,90 @@ alternateConfig:
       retry_on_failure:
         enabled: true
         max_elapsed_time: 0s
-    prometheusremotewrite:
+    prometheusremotewrite: &remote_write
       endpoint: http://telemetry-clickhouse-headless.monitoring.svc.cluster.local:8123/prometheus/api/v1/write
-      auth:
+      auth: &id001
         authenticator: basicauth/clickhouse
-      tls:
+      tls: &id002
         insecure: true
-      resource_to_telemetry_conversion:
+      resource_to_telemetry_conversion: &id003
         enabled: true
-      remote_write_queue:
+      remote_write_queue: &id004
         num_consumers: 1
         queue_size: 1000
-      retry_on_failure:
+      retry_on_failure: &id005
         enabled: true
         max_elapsed_time: 0s
+    prometheusremotewrite/scraped:
+      <<: *remote_write
+      translation_strategy: UnderscoreEscapingWithoutSuffixes
   service:
-    extensions: [health_check, file_storage/queue, basicauth/clickhouse]
+    extensions:
+    - health_check
+    - file_storage/queue
+    - basicauth/clickhouse
     pipelines:
       logs:
-        receivers: [otlp]
-        processors: [memory_limiter, resource/cluster, transform/services]
-        exporters: [clickhouse]
+        receivers:
+        - otlp
+        processors:
+        - memory_limiter
+        - resource/cluster
+        - transform/services
+        exporters:
+        - clickhouse
       traces:
-        receivers: [otlp]
-        processors: [memory_limiter, resource/cluster]
-        exporters: [clickhouse]
+        receivers:
+        - otlp
+        processors:
+        - memory_limiter
+        - resource/cluster
+        exporters:
+        - clickhouse
       metrics:
-        receivers: [otlp]
-        processors: [memory_limiter, resource/cluster, deltatocumulative, batch/metrics]
-        exporters: [prometheusremotewrite]
+        receivers:
+        - otlp
+        processors:
+        - memory_limiter
+        - resource/cluster
+        - deltatocumulative
+        - batch/metrics
+        exporters:
+        - prometheusremotewrite
+      metrics/scraped:
+        receivers:
+        - prometheus
+        processors:
+        - memory_limiter
+        - resource/cluster
+        - batch/metrics
+        exporters:
+        - prometheusremotewrite/scraped
+    telemetry:
+      metrics:
+        readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: ${env:MY_POD_IP}
+                port: 8888
+clusterRole:
+  rules:
+  - apiGroups:
+    - ''
+    resources:
+    - nodes
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - ''
+    resources:
+    - nodes/metrics
+    verbs:
+    - get
+  - nonResourceURLs:
+    - /metrics
+    verbs:
+    - get

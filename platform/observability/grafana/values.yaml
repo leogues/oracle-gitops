@@ -1,8 +1,5 @@
-replicas: 1
 admin:
   existingSecret: grafana-admin
-  userKey: admin-user
-  passwordKey: admin-password
 initChownData:
   enabled: false
 resources:
@@ -13,12 +10,16 @@ resources:
     cpu: 500m
     memory: 512Mi
 plugins:
-  - grafana-clickhouse-datasource@4.23.4
+- grafana-clickhouse-datasource@4.23.4
 envValueFrom:
   CLICKHOUSE_READER_PASSWORD:
     secretKeyRef:
       name: clickhouse-auth
       key: reader-password
+  CLICKHOUSE_WRITER_PASSWORD:
+    secretKeyRef:
+      name: clickhouse-auth
+      key: writer-password
 grafana.ini:
   server:
     domain: grafana.leogues.com
@@ -28,57 +29,71 @@ grafana.ini:
   analytics:
     reporting_enabled: false
     check_for_updates: false
+  recording_rules:
+    default_datasource_uid: clickhouse-recording-rules
 datasources:
   datasources.yaml:
     apiVersion: 1
     datasources:
-      - name: ClickHouse Metrics
-        uid: clickhouse-prometheus
-        type: prometheus
-        access: proxy
-        url: http://telemetry-clickhouse-headless.monitoring.svc.cluster.local:8123/prometheus
-        isDefault: true
-        basicAuth: true
-        basicAuthUser: grafana
-        secureJsonData:
-          basicAuthPassword: $CLICKHOUSE_READER_PASSWORD
-        jsonData:
-          httpMethod: POST
-          timeInterval: 60s
-          prometheusType: Prometheus
-          prometheusVersion: 3.5.0
-      - name: ClickHouse Logs and Traces
-        uid: clickhouse
-        type: grafana-clickhouse-datasource
-        access: proxy
-        jsonData:
-          server: telemetry-clickhouse-headless.monitoring.svc.cluster.local
-          port: 9000
-          protocol: native
-          username: grafana
+    - name: ClickHouse Metrics
+      uid: clickhouse-prometheus
+      type: prometheus
+      access: proxy
+      url: http://telemetry-clickhouse-headless.monitoring.svc.cluster.local:8123/prometheus
+      isDefault: true
+      basicAuth: true
+      basicAuthUser: grafana
+      secureJsonData:
+        basicAuthPassword: $CLICKHOUSE_READER_PASSWORD
+      jsonData:
+        httpMethod: POST
+        timeInterval: 60s
+        prometheusType: Prometheus
+        manageAlerts: false
+        prometheusVersion: 3.5.0
+    - name: ClickHouse Logs and Traces
+      uid: clickhouse
+      type: grafana-clickhouse-datasource
+      access: proxy
+      jsonData:
+        server: telemetry-clickhouse-headless.monitoring.svc.cluster.local
+        port: 9000
+        protocol: native
+        username: grafana
+        defaultDatabase: otel
+        logs:
           defaultDatabase: otel
-          logs:
-            defaultDatabase: otel
-            defaultTable: otel_logs
-            otelEnabled: true
-            otelVersion: auto
-          traces:
-            defaultDatabase: otel
-            defaultTable: otel_traces
-            otelEnabled: true
-            otelVersion: auto
-        secureJsonData:
-          password: $CLICKHOUSE_READER_PASSWORD
+          defaultTable: otel_logs
+          otelEnabled: true
+          otelVersion: auto
+        traces:
+          defaultDatabase: otel
+          defaultTable: otel_traces
+          otelEnabled: true
+          otelVersion: auto
+      secureJsonData:
+        password: $CLICKHOUSE_READER_PASSWORD
+    - name: ClickHouse Recording Rules
+      uid: clickhouse-recording-rules
+      type: prometheus
+      access: proxy
+      url: http://telemetry-clickhouse-headless.monitoring.svc.cluster.local:8123/prometheus
+      basicAuth: true
+      basicAuthUser: otel
+      secureJsonData:
+        basicAuthPassword: $CLICKHOUSE_WRITER_PASSWORD
+      jsonData:
+        httpMethod: POST
+        timeInterval: 60s
+        prometheusType: Prometheus
+        manageAlerts: false
+        allowAsRecordingRulesTarget: true
 sidecar:
   dashboards:
     enabled: true
-    label: grafana_dashboard
     searchNamespace: monitoring
-    folder: /tmp/dashboards
     provider:
       allowUiUpdates: true
-  datasources:
-    enabled: false
   resources:
     requests:
       cpu: 10m
@@ -89,7 +104,34 @@ sidecar:
 persistence:
   enabled: true
   storageClassName: longhorn
-  accessModes: [ReadWriteOnce]
   size: 1Gi
 testFramework:
   enabled: false
+# Helm uses this key for recording rules too; no alert rules are provisioned.
+alerting:
+  kubernetes-recording-rules.yaml:
+    apiVersion: 1
+    groups:
+    - orgId: 1
+      name: kubernetes-recording-rules
+      folder: Infrastructure
+      interval: 1m
+      rules:
+      - uid: kubernetes-container-cpu
+        title: Kubernetes container CPU usage
+        record:
+          metric: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
+          from: A
+          targetDatasourceUid: clickhouse-recording-rules
+        data:
+        - refId: A
+          datasourceUid: clickhouse-prometheus
+          relativeTimeRange:
+            from: 600
+            to: 0
+          model:
+            expr: sum by (node, namespace, pod, container) (irate(container_cpu_usage_seconds_total{container!="",namespace!="production"}[5m]))
+            instant: true
+            refId: A
+            intervalMs: 60000
+            maxDataPoints: 43200

@@ -25,4 +25,4 @@ spec:
     path: platform/observability
     directory:
       recurse: true
-      include: '{clickhouse-operator,clickhouse,otel-collector,grafana}/application.yaml'
+      include: '{clickhouse-operator,clickhouse,otel-collector,kube-state-metrics,grafana}/application.yaml'

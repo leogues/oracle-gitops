@@ -1,0 +1,20 @@
+collectors:
+- nodes
+- pods
+- persistentvolumeclaims
+metricLabelsAllowlist:
+- nodes=[topology.kubernetes.io/zone]
+metricAllowlist:
+- kube_node_labels
+- kube_pod_info
+- kube_pod_container_resource_requests
+- kube_pod_container_status_ready
+- kube_pod_status_ready
+- kube_pod_spec_volumes_persistentvolumeclaims_info
+resources:
+  requests:
+    cpu: 20m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 128Mi

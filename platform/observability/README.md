@@ -10,18 +10,25 @@ k8s-monitoring chart are preserved but disabled.
 
 - OTLP metrics and host/kubelet metrics → Collector → Prometheus remote write
   → ClickHouse `prometheus.metrics` (`TimeSeries`) → Grafana Prometheus datasource.
-- OTLP logs/traces and production container logs → Collector → ClickHouse
+- OTLP logs/traces and non-production container logs → Collector → ClickHouse
   exporter → `otel.otel_logs` / `otel.otel_traces` → Grafana ClickHouse datasource.
-- No application `/metrics` scraping, instrumentation, images, or application
-  environment changes are part of this deployment.
+- Prometheus scraping discovers infrastructure endpoints outside `production`,
+  including PostgreSQL, operators, Argo CD, DNS, Gateway, Longhorn and the
+  observability stack. Production pod targets are dropped before scraping.
+- Container file logs exclude `production` and the Collector itself (to prevent
+  an export-error feedback loop). OTLP remains available to production clients.
+- No instrumentation, images, or application environment changes are included.
 
 The cluster-internal OTLP endpoints are
 `otel-collector.monitoring.svc.cluster.local:4317` (gRPC) and
 `http://otel-collector.monitoring.svc.cluster.local:4318` (HTTP). They are not
 published through the Gateway. Applications can push all signals later;
 the metrics pipeline converts delta metrics to cumulative before remote write.
-When applications switch to OTLP logs, remove their file-log collection to
-avoid ingesting the same event twice.
+Native OTLP and scraped metrics use separate remote-write exporters. The
+scraped pipeline preserves original Prometheus metric names for the official
+PostgreSQL dashboard. Kubelet/cAdvisor scrapes also drop samples labeled
+`namespace="production"`. Existing kubelet stats continue to provide pod
+resource usage across the cluster.
 
 ## Grafana
 
@@ -40,6 +47,18 @@ https://github.com/grafana/clickhouse-datasource/tree/v4.23.4/src/dashboards.
 The additional `Harus — Infraestrutura` dashboard uses PromQL for node CPU,
 memory, root filesystem, active series, and CPU/memory per pod.
 No traces from applications should be expected until they are instrumented.
+
+The official **CloudNativePG** dashboard comes from the `cluster` chart 0.0.5
+in https://github.com/cloudnative-pg/grafana-dashboards. Only datasource and
+initial variable selections are configured locally; its queries stay upstream.
+`kube-state-metrics` chart 8.8.0 supplies a small allowlist of pod/node metadata.
+Grafana provisions the required CPU recording rule and writes its output to
+ClickHouse using the existing writer credential through a dedicated target
+datasource. There are no alert rules or notifications.
+
+Dashboard manifests include `dashboard` in their filenames. PostgreSQL panels
+for replicas, backups, WAL PVCs and resource-request ratios can be empty when
+those features or requests are not configured on the single-instance database.
 
 ## Storage, bootstrap and upgrades
 
@@ -65,8 +84,10 @@ Deployment validation on 2026-10-31 covered synthetic OTLP metrics, logs and
 traces, their storage in ClickHouse, Grafana datasource health, PromQL panel
 queries and a SQL query through Grafana. Production pod templates, replica
 counts and images were compared before/after and were unchanged. The Collector
-waits for the bootstrap user before starting and contains no Prometheus scrape
-receiver for application endpoints.
+waits for the bootstrap user before starting. A subsequent scope update adds
+non-production logs and `/metrics` discovery, while retaining production pod
+template/image/replica settings. Default overrides were removed only from the
+new observability values, with identical Helm output before/after cleanup.
 
 References:
 

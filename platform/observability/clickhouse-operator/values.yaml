@@ -4,17 +4,13 @@ controller:
   networkPolicyManagement:
     enabled: false
 manager:
-  replicas: 1
   resources:
     requests:
       cpu: 25m
-      memory: 64Mi
     limits:
       cpu: 250m
       memory: 192Mi
 rbac:
   namespaced: true
 metrics:
-  enabled: false
-prometheus:
-  enabled: false
+  secure: false

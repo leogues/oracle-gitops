@@ -30,8 +30,9 @@ Observability uses one ClickHouse, one Keeper, an OpenTelemetry Collector
 DaemonSet and Grafana. Metrics use TimeSeries/PromQL; logs and traces use the
 ClickHouse exporter schema. The wrapper explicitly selects these stacks;
 legacy Loki, Mimir and k8s-monitoring stay disabled. Prometheus CRDs and
-database monitoring remain disabled. Application instrumentation is a separate
-change: no application `/metrics` endpoints are scraped. This deployment has
+PodMonitor resources remain disabled. The Collector scrapes infrastructure
+`/metrics` and reads container logs outside `production`; production applications
+will send telemetry through OTLP separately. This deployment has
 no node redundancy. See [the observability runbook](platform/observability/README.md).
 
 Sync waves on the wrappers control the order in which categories come up.
