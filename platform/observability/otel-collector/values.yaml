@@ -5,6 +5,33 @@ image:
   tag: 0.163.2
 command:
   name: otelcol-contrib
+initContainers:
+  - name: wait-clickhouse
+    image: clickhouse/clickhouse-server:26.10.2.103
+    command: [/bin/bash, -ec]
+    args:
+      - |
+        for attempt in $(seq 1 120); do
+          if clickhouse-client --host telemetry-clickhouse-headless --port 9000 --user otel --password "$WRITER_PASSWORD" --query 'SELECT 1' >/dev/null 2>&1; then
+            exit 0
+          fi
+          sleep 5
+        done
+        echo 'ClickHouse bootstrap did not become ready' >&2
+        exit 1
+    env:
+      - name: WRITER_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: clickhouse-auth
+            key: writer-password
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
 resources:
   requests:
     cpu: 100m

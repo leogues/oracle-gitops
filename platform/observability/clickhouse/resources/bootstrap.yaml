@@ -31,11 +31,13 @@ data:
     GRANT SELECT ON prometheus.* TO grafana;
     GRANT SELECT ON system.tables TO grafana;
     GRANT SELECT ON system.columns TO grafana;
+    -- PromQL builds temporary intermediate tables while evaluating queries.
+    GRANT CREATE TEMPORARY TABLE ON *.* TO grafana;
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: clickhouse-bootstrap-v1
+  name: clickhouse-bootstrap-v2
   namespace: monitoring
   annotations:
     argocd.argoproj.io/sync-wave: "2"
