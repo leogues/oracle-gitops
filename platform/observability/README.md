@@ -35,10 +35,11 @@ resource usage across the cluster.
 URL: https://grafana.leogues.com. Credentials reuse `monitoring/grafana-admin`,
 managed by SOPS/Terraform in `oracle-infra`. ClickHouse reader/writer/bootstrap
 credentials are in the separately encrypted `monitoring/clickhouse-auth` Secret.
-The Grafana account has SELECT grants on telemetry/schema metadata and can
-create temporary tables required by PromQL evaluation. It cannot change
-persistent telemetry tables. The Collector has write/schema permissions only
-for telemetry.
+The Grafana account has `SELECT, SHOW ON *.*` and `REMOTE ON *.*`, matching
+the reader grants in Nemu's ClickHouse installation. This covers system logs,
+table metadata and distributed queries used by the cloned dashboards. It can
+also create temporary tables required by PromQL evaluation; persistent writes
+are not granted. The Collector has write/schema permissions only for telemetry.
 
 The official ClickHouse plugin is pinned to 4.23.4. Logs/traces use its
 `latest` OTel schema selector (the UI label is “auto (latest)”). Three upstream OTel
@@ -83,7 +84,7 @@ with one Longhorn replica. This is a single-node deployment with no failover.
 ClickHouse has a 2.5 GiB container memory limit and 2 GiB server memory budget.
 Collector file checkpoints and export queue use persistent node directories.
 
-`clickhouse-bootstrap-v2` is an idempotent GitOps Job. It creates databases,
+`clickhouse-bootstrap-v3` is an idempotent GitOps Job. It creates databases,
 the TimeSeries table and separate SQL users. The Collector creates its standard
 log/trace tables. Metric samples, logs and traces have a 72-hour TTL; TimeSeries
 series/tag metadata is separate and is not deleted by the samples TTL. The

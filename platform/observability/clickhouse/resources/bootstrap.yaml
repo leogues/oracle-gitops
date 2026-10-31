@@ -27,17 +27,16 @@ data:
     GRANT CREATE, ALTER, INSERT, SELECT ON otel.* TO otel;
     GRANT INSERT, SELECT ON prometheus.* TO otel;
     CREATE USER IF NOT EXISTS grafana IDENTIFIED WITH sha256_hash BY {reader_hash:String};
-    GRANT SELECT ON otel.* TO grafana;
-    GRANT SELECT ON prometheus.* TO grafana;
-    GRANT SELECT ON system.tables TO grafana;
-    GRANT SELECT ON system.columns TO grafana;
+    -- Match Nemu's Grafana reader grants for system/analysis dashboards.
+    GRANT SELECT, SHOW ON *.* TO grafana;
+    GRANT REMOTE ON *.* TO grafana;
     -- PromQL builds temporary intermediate tables while evaluating queries.
     GRANT CREATE TEMPORARY TABLE ON *.* TO grafana;
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: clickhouse-bootstrap-v2
+  name: clickhouse-bootstrap-v3
   namespace: monitoring
   annotations:
     argocd.argoproj.io/sync-wave: "2"
