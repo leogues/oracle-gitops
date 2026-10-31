@@ -3,7 +3,7 @@ telemetry:
   enabled: true
 image:
   repository: leogues/music-hub-backend
-  tag: "29"
+  tag: "30"
 service:
   port: 8080
 livenessProbe: null
