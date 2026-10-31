@@ -128,6 +128,11 @@ env: {}
   # configMapName: my-app-config
   # secretName: my-app-secret
 
+# Enable OTLP for instrumented backends. Identity is resolved by the Collector.
+telemetry:
+  enabled: false
+  endpoint: http://otel-collector.monitoring.svc.cluster.local:4318
+
 rollout:
   enabled: false
   trafficRouting:

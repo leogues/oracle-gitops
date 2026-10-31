@@ -1,4 +1,6 @@
 fullnameOverride: live-link
+telemetry:
+  enabled: true
 image:
   repository: leogues/video-chat-backend
   tag: "54"

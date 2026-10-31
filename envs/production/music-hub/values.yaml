@@ -1,4 +1,6 @@
 fullnameOverride: music-hub
+telemetry:
+  enabled: true
 image:
   repository: leogues/music-hub-backend
   tag: "29"

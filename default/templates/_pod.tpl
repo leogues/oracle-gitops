@@ -38,6 +38,21 @@ spec:
             name: {{ . }}
         {{- end }}
       {{- end }}
+      {{- if .Values.telemetry.enabled }}
+      env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: {{ .Values.telemetry.endpoint | quote }}
+        - name: OTEL_METRIC_EXPORT_INTERVAL
+          value: "60000"
+        - name: OTEL_SEMCONV_STABILITY_OPT_IN
+          value: http
+        - name: OTEL_POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "k8s.pod.uid=$(OTEL_POD_UID),k8s.container.name={{ .Chart.Name }}"
+      {{- end }}
       ports:
         - name: http
           containerPort: {{ .Values.service.port }}
