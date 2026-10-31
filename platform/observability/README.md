@@ -50,16 +50,31 @@ memory, root filesystem, active series, and CPU/memory per pod.
 No traces from applications should be expected until they are instrumented.
 
 The official **CloudNativePG** dashboard comes from the `cluster` chart 0.0.5
-in https://github.com/cloudnative-pg/grafana-dashboards. Datasource and initial variable selections are configured locally; the alert
-list panel is removed. Its queries stay upstream.
+in https://github.com/cloudnative-pg/grafana-dashboards. The upstream alert list
+panel is retained even when no alert rules exist.
+Local adaptations use `$__rate_interval` for the 60-second scrape interval,
+match the operator release name and include the `postgres` database containing
+the application schemas. I/O, deadlock and temporary-file panels cover
+non-template databases and shared objects, rather than only the shared-object
+row with an empty database name. The initial time range is one hour.
+CPU/memory percentages and the resource-health summary use allocatable capacity
+on the nodes hosting the selected instances; PostgreSQL has no resource requests.
+The gauges are explicitly labelled `CPU / Node` and `Memory / Node`.
 `kube-state-metrics` chart 8.8.0 supplies a small allowlist of pod/node metadata.
 Grafana provisions the required CPU recording rule and writes its output to
 ClickHouse using the existing writer credential through a dedicated target
 datasource. There are no alert rules or notifications.
 
 Dashboard manifests include `dashboard` in their filenames. PostgreSQL panels
-for replicas, backups, WAL PVCs and resource-request ratios can be empty when
-those features or requests are not configured on the single-instance database.
+for standby-only lag, backups, separate WAL PVCs and tablespaces can be empty
+when those features are not configured on the single-instance database.
+The CNPG operator chart is pinned to 0.28.3 (operator 1.29.1): 0.28.1 contained
+a trailing quote in the `pg_replication` monitoring SQL, preventing its metrics
+from being exported. The upstream patch fixes the query without SQL overrides
+or changes to PostgreSQL workload resources.
+
+Core panels are validated through Grafana using short rate windows, including
+all CPU/memory/connection summary queries.
 
 ## Storage, bootstrap and upgrades
 
