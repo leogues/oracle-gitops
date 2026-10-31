@@ -47,9 +47,10 @@ The official ClickHouse plugin is pinned to 4.23.4. Logs/traces use its
 Dashboards and folders are managed by Grafana Git Sync from the `main` branch
 of `leogues/oracle-gitops`, path `grafana-dashboards/`. The PostgreSQL dashboard
 is `cloudnativepg.json` (UID `ddg2w79lsgd98gb`). The `clickhouse/` directory has
-stable folder metadata and five dashboards: Advanced Monitoring, Cluster
-Analysis, Data Analysis, Query Analysis and Keeper. The Altinity operator
-dashboard is removed because this cluster uses the official ClickHouse operator.
+stable folder metadata and six dashboards: Overview, Advanced Monitoring,
+Cluster Analysis, Data Analysis, Query Analysis and Keeper. Overview replaces
+the former operator dashboard with 16 panels using native ClickHouse, cAdvisor
+and Longhorn metrics. It has no dependency on the Altinity exporter.
 
 ClickHouse dashboards discover cluster names from `system.clusters` and offer
 instance, database, table, user, status and query-kind filters where relevant.
@@ -60,6 +61,24 @@ Validation covered all 97 panel queries and 10 query variables with All and
 specific selections, including the deployed Grafana models. Empty mutation,
 replication, dictionary and detached-part panels are expected when those
 resources are absent or idle.
+
+The Overview dashboard (`clickhouse-overview-dashboard.json`) filters Kubernetes
+cluster, namespace, pod and PVC dynamically. The PVC list intersects pod volume
+metadata with ClickHouse scrape targets so All cannot include Keeper, Grafana
+or PostgreSQL PVCs. CPU and memory use cAdvisor consumption plus cgroup limits;
+MergeTree data bytes are distinct from total filesystem usage.
+
+The IOPS and MB/s panels use Longhorn's existing per-volume rate gauges for
+reads, writes and their total. Shared reference lines are editable inputs:
+6,000 IOPS and 48 MB/s for the current 100 GB Balanced (10 VPU/GB) boot volume,
+verified in the compute Terraform state. These are nominal physical-disk
+references shared with the node's other workloads, not per-PVC reservations.
+Throughput uses decimal MB/s (bytes/s divided by 1,000,000). Update the inputs
+when changing the boot-volume size or performance tier. See
+https://docs.oracle.com/en-us/iaas/Content/Block/Concepts/blockvolumebalancedperformance.htm.
+Overview's 29 queries and four query variables are validated with All and
+individual selections, including numeric data and isolation of the ClickHouse
+PVC. Metrics come from the existing ClickHouse, cAdvisor and Longhorn exporters.
 
 The five legacy ConfigMap dashboards and their sidecar/provider are removed.
 Datasources and the CPU recording rule remain provisioned by Helm. The Git Sync

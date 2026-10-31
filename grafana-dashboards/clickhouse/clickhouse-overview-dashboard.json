@@ -1,0 +1,1519 @@
+{
+  "apiVersion": "dashboard.grafana.app/v1",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "clickhouse-overview"
+  },
+  "spec": {
+    "title": "ClickHouse — Visão geral",
+    "description": "Visão operacional enxuta com métricas nativas do ClickHouse e cAdvisor. Resumos agregam os servidores selecionados; gráficos distinguem cluster Kubernetes, namespace e pod. Limites de CPU e memória são descobertos do cgroup. I/O usa as taxas do PVC Longhorn e referências editáveis do disco OCI, compartilhadas com o nó.",
+    "tags": [
+      "clickhouse",
+      "overview",
+      "metrics",
+      "kubernetes"
+    ],
+    "schemaVersion": 41,
+    "editable": true,
+    "graphTooltip": 1,
+    "refresh": "1m",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timezone": "browser",
+    "templating": {
+      "list": [
+        {
+          "name": "DS_PROMETHEUS",
+          "type": "datasource",
+          "query": "prometheus",
+          "hide": 2,
+          "current": {
+            "text": "ClickHouse Metrics",
+            "value": "clickhouse-prometheus"
+          },
+          "options": [],
+          "refresh": 1
+        },
+        {
+          "name": "kubernetes_cluster",
+          "label": "Cluster Kubernetes",
+          "type": "query",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "query": {
+            "query": "label_values(up{container=\"clickhouse-server\"}, k8s_cluster_name)",
+            "refId": "StandardVariableQuery"
+          },
+          "definition": "label_values(up{container=\"clickhouse-server\"}, k8s_cluster_name)",
+          "refresh": 2,
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*",
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
+          "options": [],
+          "sort": 1,
+          "allowCustomValue": false
+        },
+        {
+          "name": "namespace",
+          "label": "Namespace",
+          "type": "query",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "query": {
+            "query": "label_values(up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\"}, namespace)",
+            "refId": "StandardVariableQuery"
+          },
+          "definition": "label_values(up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\"}, namespace)",
+          "refresh": 2,
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*",
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
+          "options": [],
+          "sort": 1,
+          "allowCustomValue": false
+        },
+        {
+          "name": "pod",
+          "label": "Pod",
+          "type": "query",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "query": {
+            "query": "label_values(up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\"}, pod)",
+            "refId": "StandardVariableQuery"
+          },
+          "definition": "label_values(up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\"}, pod)",
+          "refresh": 2,
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*",
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
+          "options": [],
+          "sort": 1,
+          "allowCustomValue": false
+        },
+        {
+          "name": "pvc",
+          "label": "PVC de dados",
+          "type": "query",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "query": {
+            "query": "query_result(max by (k8s_cluster_name, namespace, pod, persistentvolumeclaim) (kube_pod_spec_volumes_persistentvolumeclaims_info{k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}) and on (k8s_cluster_name, namespace, pod) up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "refId": "StandardVariableQuery"
+          },
+          "definition": "query_result(max by (k8s_cluster_name, namespace, pod, persistentvolumeclaim) (kube_pod_spec_volumes_persistentvolumeclaims_info{k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}) and on (k8s_cluster_name, namespace, pod) up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+          "refresh": 2,
+          "multi": true,
+          "includeAll": true,
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
+          "options": [],
+          "sort": 1,
+          "allowCustomValue": false,
+          "description": "Volumes usados pelos pods ClickHouse selecionados. Todos expande somente esta lista de PVCs.",
+          "regex": "/persistentvolumeclaim=\"([^\"]+)\"/"
+        },
+        {
+          "name": "disk_iops_limit",
+          "label": "Referência disco · IOPS",
+          "type": "textbox",
+          "query": "6000",
+          "current": {
+            "text": "6000",
+            "value": "6000"
+          },
+          "options": [
+            {
+              "text": "6000",
+              "value": "6000",
+              "selected": true
+            }
+          ],
+          "description": "Teto nominal compartilhado do disco físico OCI. Perfil atual: boot volume de 100 GB, Balanced (10 VPUs/GB). Atualize se mudar o perfil ou o volume; não representa uma quota exclusiva deste PVC."
+        },
+        {
+          "name": "disk_mbps_limit",
+          "label": "Referência disco · MB/s",
+          "type": "textbox",
+          "query": "48",
+          "current": {
+            "text": "48",
+            "value": "48"
+          },
+          "options": [
+            {
+              "text": "48",
+              "value": "48",
+              "selected": true
+            }
+          ],
+          "description": "Teto nominal compartilhado do disco físico OCI em MB/s decimais. Perfil atual: 100 GB Balanced. Atualize ao mudar o perfil/volume."
+        }
+      ]
+    },
+    "links": [
+      {
+        "type": "dashboards",
+        "title": "Outros dashboards ClickHouse",
+        "tags": [
+          "clickhouse"
+        ],
+        "asDropdown": true,
+        "includeVars": false,
+        "keepTime": true
+      }
+    ],
+    "panels": [
+      {
+        "id": 1,
+        "title": "Disponibilidade",
+        "type": "stat",
+        "description": "Proporção dos alvos ClickHouse selecionados cujo último scrape foi bem-sucedido. Ausência de métricas permanece visível como No data.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 4,
+          "h": 4
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "orange",
+                  "value": 0.8
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            },
+            "min": 0,
+            "max": 1
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "values": false
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum(up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}) / count(up{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "Disponibilidade",
+            "instant": true,
+            "range": false
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Uptime (menor)",
+        "type": "stat",
+        "description": "Menor uptime entre os servidores selecionados, para destacar reinicializações recentes.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 4,
+          "y": 0,
+          "w": 4,
+          "h": 4
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "dtdurations",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "blue",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "values": false
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "min(ClickHouseAsyncMetrics_Uptime{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "Uptime (menor)",
+            "instant": true,
+            "range": false
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Consultas em execução",
+        "type": "stat",
+        "description": "Gauge de consultas em execução; não é um contador acumulado.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 8,
+          "y": 0,
+          "w": 4,
+          "h": 4
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "blue",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "values": false
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum(ClickHouseMetrics_Query{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "Consultas em execução",
+            "instant": true,
+            "range": false
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Memória — working set",
+        "type": "stat",
+        "description": "Working set dos contêineres ClickHouse selecionados, coletado pelo cAdvisor.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 4,
+          "h": 4
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "blue",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "values": false
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum(container_memory_working_set_bytes{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "Memória — working set",
+            "instant": true,
+            "range": false
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Dados MergeTree",
+        "type": "stat",
+        "description": "Bytes comprimidos de dados e índices de tabelas MergeTree, conforme o exporter nativo. O uso total do volume está no gráfico de armazenamento.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 16,
+          "y": 0,
+          "w": 4,
+          "h": 4
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "blue",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "values": false
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum(ClickHouseAsyncMetrics_TotalBytesOfMergeTreeTables{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "Dados MergeTree",
+            "instant": true,
+            "range": false
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Partes ativas",
+        "type": "stat",
+        "description": "Gauge de partes ativas. As estatísticas detalhadas por tabela ficam no dashboard Data Analysis.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 20,
+          "y": 0,
+          "w": 4,
+          "h": 4
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "blue",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "values": false
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum(ClickHouseMetrics_PartsActive{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "Partes ativas",
+            "instant": true,
+            "range": false
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Consultas por segundo",
+        "type": "timeseries",
+        "description": "Taxa dos contadores nativos, calculada com uma janela adequada ao intervalo de scrape.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 0,
+          "y": 4,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_SelectQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · SELECT",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_InsertQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · INSERT",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Linhas inseridas por segundo",
+        "type": "timeseries",
+        "description": "Taxa de linhas inseridas; sem confundir contagem acumulada com taxa.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 4,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_InsertedRows{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · linhas/s",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "CPU do contêiner",
+        "type": "timeseries",
+        "description": "CPU consumida em núcleos via cAdvisor. A linha tracejada vem da quota de CPU detectada pelo ClickHouse no cgroup; não há limite fixado no JSON.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 0,
+          "y": 11,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "cores",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".* · (limite|capacidade)$"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      6,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "orange"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(container_cpu_usage_seconds_total{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · uso",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_CGroupMaxCPU{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · limite",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Memória do contêiner",
+        "type": "timeseries",
+        "description": "Working set via cAdvisor e limite de memória do cgroup via exporter nativo. Não confunde o limite do contêiner com o orçamento interno do servidor.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 11,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".* · (limite|capacidade)$"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      6,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "orange"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (container_memory_working_set_bytes{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · working set",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_CGroupMemoryTotal{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · limite",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Volume de dados — uso e capacidade",
+        "type": "timeseries",
+        "description": "Uso e capacidade do filesystem do diretório principal do ClickHouse, incluindo espaço utilizado fora dos dados MergeTree.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 0,
+          "y": 18,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".* · (limite|capacidade)$"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      6,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "orange"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_FilesystemMainPathUsedBytes{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · usado",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseAsyncMetrics_FilesystemMainPathTotalBytes{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · capacidade",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Consultas com falha por segundo",
+        "type": "timeseries",
+        "description": "Taxas de falhas registradas pelo ClickHouse. As consultas detalhadas ficam no Query Analysis.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 18,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_FailedSelectQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · SELECT com falha",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_FailedInsertQuery{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · INSERT com falha",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "IOPS do volume — leitura e escrita",
+        "type": "timeseries",
+        "description": "Leitura e escrita medidas no PVC do ClickHouse pelo Longhorn; as métricas já são taxas, sem rate adicional. A linha tracejada é a referência nominal do disco físico OCI, compartilhada com os outros volumes e o sistema do nó. Esses parâmetros são editáveis no topo. Não é uma reserva exclusiva do PVC.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 0,
+          "y": 25,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".* · limite compartilhado$"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      6,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "orange"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".* · total$"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineWidth",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"})",
+            "legendFormat": "{{pvc}} · leitura",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"})",
+            "legendFormat": "{{pvc}} · escrita",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "C",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "(max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"})) + (max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_iops{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}))",
+            "legendFormat": "{{pvc}} · total",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "D",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "0 * max by (k8s_cluster_name, node) (longhorn_volume_capacity_bytes{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) + ${disk_iops_limit:raw}",
+            "legendFormat": "{{node}} · limite compartilhado",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "MB/s do volume — leitura e escrita",
+        "type": "timeseries",
+        "description": "Leitura e escrita medidas no PVC do ClickHouse pelo Longhorn; as métricas já são taxas, sem rate adicional. A linha tracejada é a referência nominal do disco físico OCI, compartilhada com os outros volumes e o sistema do nó. Esses parâmetros são editáveis no topo. Não é uma reserva exclusiva do PVC. A conversão usa 1 MB = 1.000.000 bytes.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 25,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "suffix: MB/s",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            },
+            "decimals": 3
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".* · limite compartilhado$"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      6,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "orange"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".* · total$"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineWidth",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000",
+            "legendFormat": "{{pvc}} · leitura",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000",
+            "legendFormat": "{{pvc}} · escrita",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "C",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "(max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_read_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000) + (max by (k8s_cluster_name, node, pvc_namespace, pvc) (longhorn_volume_write_throughput{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) / 1000000)",
+            "legendFormat": "{{pvc}} · total",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "D",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "0 * max by (k8s_cluster_name, node) (longhorn_volume_capacity_bytes{k8s_cluster_name=~\"$kubernetes_cluster\",pvc_namespace=~\"$namespace\",pvc=~\"${pvc:regex}\"}) + ${disk_mbps_limit:raw}",
+            "legendFormat": "{{node}} · limite compartilhado",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Tarefas em segundo plano",
+        "type": "timeseries",
+        "description": "Gauges nativas dos pools de tarefas ativas; zeros representam pools ociosos.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 0,
+          "y": 32,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseMetrics_BackgroundMergesAndMutationsPoolTask{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · merges/mutações",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseMetrics_BackgroundSchedulePoolTask{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · agendadas",
+            "instant": false,
+            "range": true
+          },
+          {
+            "refId": "C",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (ClickHouseMetrics_BackgroundMovePoolTask{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"})",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · movimentação",
+            "instant": false,
+            "range": true
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Linhas mescladas por segundo",
+        "type": "timeseries",
+        "description": "Atividade de merges a partir do contador nativo, usando rate com a janela de scrape.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 32,
+          "w": 12,
+          "h": 7
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 8,
+              "spanNulls": false,
+              "axisCenteredZero": false
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (k8s_cluster_name, namespace, pod) (rate(ClickHouseProfileEvents_MergedRows{container=\"clickhouse-server\",k8s_cluster_name=~\"$kubernetes_cluster\",namespace=~\"$namespace\",pod=~\"$pod\"}[$__rate_interval]))",
+            "legendFormat": "{{k8s_cluster_name}} / {{namespace}} / {{pod}} · linhas/s",
+            "instant": false,
+            "range": true
+          }
+        ]
+      }
+    ]
+  }
+}
