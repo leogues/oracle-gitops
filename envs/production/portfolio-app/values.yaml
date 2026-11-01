@@ -1,7 +1,7 @@
 fullnameOverride: portfolio-app
 image:
   repository: leogues/portfolio-frontend
-  tag: "32"
+  tag: "33"
 service:
   port: 4200
 livenessProbe: null
