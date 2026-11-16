@@ -14,8 +14,9 @@ clickhouse:
   cluster: ""
 
 embedding:
-  model: local
-  dim: 384
+  provider: openai
+  model: text-embedding-3-large
+  dim: 3072
 
 llm:
   provider: openai
@@ -64,6 +65,6 @@ topologySpread:
 podDisruptionBudget:
   enabled: false
 
-# The policy in extras allows public HTTPS for OpenAI; embeddings remain local.
+# The policy in extras allows public HTTPS for OpenAI.
 networkPolicy:
   guardMetadata: false
