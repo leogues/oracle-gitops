@@ -35,9 +35,6 @@ PodMonitor resources remain disabled. The Collector scrapes infrastructure
 will send telemetry through OTLP separately. This deployment has
 no node redundancy. See [the observability runbook](platform/observability/README.md).
 
-Loom provides private agent memory in the existing ClickHouse, with CPU-local
-embeddings and authenticated HTTPS. See [the Loom runbook](platform/agents/loom/README.md).
-
 Sync waves on the wrappers control the order in which categories come up.
 Leaf Applications inside each category use sync-wave annotations only for
 intra-group ordering (e.g. `cnpg-cluster` after `cnpg-operator`).

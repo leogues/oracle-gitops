@@ -23,7 +23,7 @@ platform/
 | 20   | networking      | Gateways + TLS + DNS — needed by HTTPRoutes downstream |
 | 30   | data            | Operators + their managed clusters                     |
 | 40   | observability | ClickHouse/Keeper, OTel Collector and Grafana; explicit allowlist excludes legacy stacks |
-| 45   | agents        | Loom memory service, after ClickHouse and Keeper are healthy |
+| 45   | agents        | Agent services, after their storage dependencies are healthy |
 | 50   | gitops          | Argo CD tooling (image-updater) — last, depends on rest |
 
 Gaps of 10 leave room for new categories (e.g. `25-security/`) without renumbering.
