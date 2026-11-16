@@ -17,10 +17,9 @@ embedding:
   model: local
   dim: 384
 
-# No hosted LLM or provider credentials. Codex writes the memories itself.
 llm:
-  provider: fake
-  model: fake-echo-1
+  provider: openai
+  model: gpt-6-luna
 
 secrets:
   existingSecret: loom-secrets
@@ -37,10 +36,12 @@ env:
   LOOM_CH_POOL_MAXSIZE: "16"
   LOOM_CH_CALLER_SHAPED_MAX_MEMORY_BYTES: "536870912"
   LOOM_CH_CALLER_SHAPED_MAX_ROWS_TO_READ: "50000000"
-  LOOM_ENTITY_EXTRACT_ENABLED: "false"
-  LOOM_CONVERSATION_TITLER_ENABLED: "false"
-  LOOM_EXTRACTION_QUEUE_ENABLED: "false"
+  LOOM_REQUIRE_REAL_PROVIDERS: "true"
+  LOOM_MEMORY_EXTRACT_VERIFY_MODELS: gpt-6-luna
   LOOM_SESSION_BRIEF_LLM_MODEL: ""
+  LOOM_CODE_BISECT_LLM_RERANK_MODEL: ""
+  LOOM_TRACKER_DUPCHECK_RERANK_MODEL: ""
+  LOOM_RETRIEVAL_JUDGE_MODEL: ""
 
 # Only the gateway reaches the HTTP listener; it supplies forwarded headers.
 trustedProxies: 10.42.0.0/16
@@ -63,6 +64,6 @@ topologySpread:
 podDisruptionBudget:
   enabled: false
 
-# The policy in extras also keeps model calls and telemetry inside the cluster.
+# The policy in extras allows public HTTPS for OpenAI; embeddings remain local.
 networkPolicy:
   guardMetadata: false

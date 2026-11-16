@@ -41,6 +41,18 @@ spec:
               app: telemetry-clickhouse
       ports:
         - port: 8123
+    # OpenAI uses public HTTPS. Private networks and instance metadata stay closed.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+              - 127.0.0.0/8
+      ports:
+        - port: 443
     # Loom retires the worker participant of a pod removed by Kubernetes.
     - to:
         - ipBlock:
