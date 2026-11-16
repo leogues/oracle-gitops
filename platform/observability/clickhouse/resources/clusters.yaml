@@ -73,6 +73,7 @@ spec:
     systemLogsTTLDays: 3
     extraConfig:
       max_server_memory_usage: 2147483648
+      keeper_map_path_prefix: /keeper_map_tables
       max_connections: 128
       mark_cache_size: 134217728
       uncompressed_cache_size: 67108864

@@ -4,13 +4,13 @@ Cluster platform stacks reconciled by Argo CD. Pattern: **2-layer app-of-apps**.
 
 ```
 platform/
-├── _groups/        # 6 active wrappers
+├── _groups/        # 7 active wrappers
 └── <category>/<stack>/{application.yaml,values.yaml,extras/}   # leaf apps
 ```
 
 ## Layers
 
-1. **Root** (`cluster/root-platform.yaml`) — points at `platform/_groups/`, creates 6 active wrapper Applications.
+1. **Root** (`cluster/root-platform.yaml`) — points at `platform/_groups/`, creates 7 active wrapper Applications.
 2. **Group wrappers** (`platform/_groups/*.yaml`) — each points at its `platform/<category>/` directory. Sync-wave on the wrapper controls category order.
 3. **Leaf apps** (`platform/<category>/<stack>/application.yaml`) — actual chart deployments. Sync-wave optional, only for intra-group ordering (e.g. `cnpg-cluster` after `cnpg-operator`).
 
@@ -23,6 +23,7 @@ platform/
 | 20   | networking      | Gateways + TLS + DNS — needed by HTTPRoutes downstream |
 | 30   | data            | Operators + their managed clusters                     |
 | 40   | observability | ClickHouse/Keeper, OTel Collector and Grafana; explicit allowlist excludes legacy stacks |
+| 45   | agents        | Loom memory service, after ClickHouse and Keeper are healthy |
 | 50   | gitops          | Argo CD tooling (image-updater) — last, depends on rest |
 
 Gaps of 10 leave room for new categories (e.g. `25-security/`) without renumbering.

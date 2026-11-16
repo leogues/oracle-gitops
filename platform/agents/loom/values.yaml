@@ -1,0 +1,67 @@
+image:
+  tag: "1.2.0"
+  digest: sha256:4fb4c91920c204b13c771efbe8522ad891ba7cfae1e7b12fad36c1f9a9dc38c7
+
+replicaCount: 1
+publicBaseUrl: https://loom.leogues.com
+
+clickhouse:
+  host: telemetry-clickhouse-headless.monitoring.svc.cluster.local
+  port: 8123
+  secure: false
+  readerUser: loom_reader
+  # The existing installation has one ClickHouse server.
+  cluster: ""
+
+embedding:
+  model: local
+  dim: 384
+
+# No hosted LLM or provider credentials. Codex writes the memories itself.
+llm:
+  provider: fake
+  model: fake-echo-1
+
+secrets:
+  existingSecret: loom-secrets
+
+env:
+  LOOM_AUTH_REQUIRED: "true"
+  LOOM_MCP_AUTH_MODE: required
+  LOOM_IDENTITY_PROVIDER: trust-network
+  LOOM_SELF_SIGNUP: "off"
+  LOOM_SELF_SIGNUP_ORG: leogues
+  LOOM_PLATFORM_ADMINS: leonardo.rodrigues@nemu.com.br
+  LOOM_OAUTH_ENABLED: "true"
+  LOOM_CH_POOL_MAXSIZE: "16"
+  LOOM_CH_CALLER_SHAPED_MAX_MEMORY_BYTES: "536870912"
+  LOOM_CH_CALLER_SHAPED_MAX_ROWS_TO_READ: "50000000"
+  LOOM_ENTITY_EXTRACT_ENABLED: "false"
+  LOOM_CONVERSATION_TITLER_ENABLED: "false"
+  LOOM_EXTRACTION_QUEUE_ENABLED: "false"
+  LOOM_SESSION_BRIEF_LLM_MODEL: ""
+
+# Only the gateway reaches the HTTP listener; it supplies forwarded headers.
+trustedProxies: 10.42.0.0/16
+webWorkers: "1"
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+  limits:
+    cpu: "1"
+    memory: 2Gi
+nodeSelector:
+  kubernetes.io/arch: arm64
+
+cache:
+  sizeLimit: 2Gi
+tmpSizeLimit: 1Gi
+topologySpread:
+  enabled: false
+podDisruptionBudget:
+  enabled: false
+
+# The policy in extras also keeps model calls and telemetry inside the cluster.
+networkPolicy:
+  guardMetadata: false

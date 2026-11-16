@@ -20,8 +20,8 @@ envs/
 
 Cluster platform deployments organised as a **2-layer app-of-apps**. The
 root Application — defined in `oracle-infra/infra/envs/prod/k8s/helm/stacks/argocd/resources/platform-root.yaml` — points at `platform/_groups/`,
-which holds six active wrapper Applications (`crds`, `foundation`, `networking`,
-`data`, `observability`, `gitops`). Each wrapper syncs its
+which holds seven active wrapper Applications (`crds`, `foundation`, `networking`,
+`data`, `observability`, `agents`, `gitops`). Each wrapper syncs its
 `platform/<category>/` directory.
 
 The current Always Free deployment uses one A1 server (2 OCPUs / 12 GB).
@@ -34,6 +34,9 @@ PodMonitor resources remain disabled. The Collector scrapes infrastructure
 `/metrics` and reads container logs outside `production`; production applications
 will send telemetry through OTLP separately. This deployment has
 no node redundancy. See [the observability runbook](platform/observability/README.md).
+
+Loom provides private agent memory in the existing ClickHouse, with CPU-local
+embeddings and authenticated HTTPS. See [the Loom runbook](platform/agents/loom/README.md).
 
 Sync waves on the wrappers control the order in which categories come up.
 Leaf Applications inside each category use sync-wave annotations only for

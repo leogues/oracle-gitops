@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loom
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: loom
+  sources:
+    - repoURL: https://github.com/ClickHouse/loom.git
+      targetRevision: 03c4aed9431846758618b48d46dacc1abe679432
+      path: deploy/helm/loom
+      helm:
+        releaseName: loom
+        skipTests: true
+        valueFiles:
+          - $values/platform/agents/loom/values.yaml
+    - repoURL: https://github.com/leogues/oracle-gitops.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/leogues/oracle-gitops.git
+      targetRevision: main
+      path: platform/agents/loom/extras
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
