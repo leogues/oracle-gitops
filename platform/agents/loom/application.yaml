@@ -19,12 +19,6 @@ spec:
         skipTests: true
         valueFiles:
           - $values/platform/agents/loom/values.yaml
-        parameters:
-          - name: image.tag
-            value: "1.3.0"
-            forceString: true
-          - name: image.digest
-            value: sha256:de44a3df7af74392c8fe149c360fa1d9c2f27ac579dd1a82ddaacbb99e373b5c
     - repoURL: https://github.com/leogues/oracle-gitops.git
       targetRevision: main
       ref: values
