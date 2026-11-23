@@ -13,6 +13,25 @@ spec:
   hostnames:
     - loom.leogues.com
   rules:
+    # Public probes receive the application's generic API 404. Kubernetes probes use the pod directly.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /health
+        - path:
+            type: PathPrefix
+            value: /v1/health
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /v1/public-health-disabled
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: loom
+          port: 7777
     - matches:
         - path:
             type: PathPrefix
